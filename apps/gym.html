@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="zh-HK" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>文東路體育館｜專屬健身追蹤器</title>
+  <!-- 載入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 載入 Google Fonts (Inter + Noto Sans TC) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+          },
+          colors: {
+            slateBg: '#0B1120',
+            slateCard: '#151F32',
+            slateElevated: '#1E293B',
+            emeraldAccent: '#10B981',
+            electricBlue: '#38BDF8',
+            amberPosture: '#F59E0B',
+          },
+          animation: {
+            'pop': 'pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            'flash-border': 'flashBorder 0.6s ease-in-out 4',
+          },
+          keyframes: {
+            pop: {
+              '0%': { transform: 'scale(0.92)' },
+              '50%': { transform: 'scale(1.04)' },
+              '100%': { transform: 'scale(1)' },
+            },
+            flashBorder: {
+              '0%, 100%': { borderColor: '#38BDF8', boxShadow: '0 0 0 0 rgba(56, 189, 248, 0)' },
+              '50%': { borderColor: '#10B981', boxShadow: '0 0 24px 4px rgba(16, 185, 129, 0.55)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* 隱藏橫向滾動條但保留流暢滑動體驗 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* 防止手機雙擊縮放與改善點擊回饋 */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: #0B1120;
+      color: #F8FAFC;
+      overscroll-behavior-y: contain;
+    }
+    /* 折疊面板平滑過渡 */
+    .accordion-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .accordion-content.open {
+      grid-template-rows: 1fr;
+    }
+    .accordion-inner {
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0B1120] text-slate-100 font-sans antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+
+  <!-- 頂部固定導覽與進度儀表板 (Sticky Header) -->
+  <header class="sticky top-0 z-40 bg-[#0B1120]/95 backdrop-blur-md border-b border-slate-800/90 shadow-lg">
+    <div class="max-w-xl mx-auto px-4 pt-3 pb-2.5">
+      <!-- 標題列與重置按鈕 -->
+      <div class="flex items-center justify-between gap-2 mb-2.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-sky-500 flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0">
+            <!-- 啞鈴圖示 SVG -->
+            <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6.5 6.5v11M17.5 6.5v11M3.5 8.5v7M20.5 8.5v7M6.5 12h11" />
+            </svg>
+          </div>
+          <div class="truncate">
+            <div class="flex items-center gap-1.5">
+              <span class="text-[11px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-400 border border-sky-500/30">東涌 · 文東路體育館</span>
+            </div>
+            <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white truncate mt-0.5">專屬體態矯正與增肌減脂追蹤</h1>
+          </div>
+        </div>
+
+        <!-- 重置本週進度按鈕 -->
+        <button id="openResetModalBtn" type="button" class="shrink-0 min-h-[40px] px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 active:scale-95 border border-slate-700 text-xs font-semibold text-slate-300 flex items-center gap-1.5 transition">
+          <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>重置本週</span>
+        </button>
+      </div>
+
+      <!-- Day 1 - Day 7 橫向滑動分頁切換器 -->
+      <nav id="dayTabsContainer" aria-label="訓練日切換" class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 scroll-smooth">
+        <!-- 由 JS 動態生成 Day 1 - Day 7 按鈕 -->
+      </nav>
+
+      <!-- 當日主題、主攻目標與完成進度條 -->
+      <div class="mt-2.5 bg-[#151F32] rounded-2xl p-3 border border-slate-800/90">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h2 id="dayTitle" class="text-sm sm:text-base font-extrabold text-white leading-snug">Day 1：上半身「推」A</h2>
+            </div>
+            <p id="dayFocus" class="text-xs text-amber-400 font-medium mt-0.5 flex items-center gap-1">
+              <span>🎯</span>
+              <span id="dayFocusText">主攻：改善圓肩、撐起上胸鎖骨</span>
+            </p>
+          </div>
+          <div class="text-right shrink-0">
+            <span id="progressText" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-lg inline-block">
+              已完成 0 / 16 組 · 0%
+            </span>
+          </div>
+        </div>
+        <!-- 視覺化進度條 -->
+        <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden mt-2.5 p-0.5">
+          <div id="progressBar" class="h-full bg-gradient-to-r from-sky-400 to-emerald-400 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主訓練內容清單區 (底部預留足夠空間避免被懸浮計時器遮擋) -->
+  <main id="workoutContainer" class="max-w-xl mx-auto px-4 pt-4 pb-36 space-y-4">
+    <!-- 由 JS 動態渲染動作卡片 -->
+  </main>
+
+  <!-- 底部懸浮 60 秒組間休息計時器 (Bottom Sticky Bar) -->
+  <div id="timerBar" class="fixed bottom-0 inset-x-0 z-40 bg-[#0F172A]/95 backdrop-blur-lg border-t-2 border-slate-800 shadow-[0_-8px_30px_rgba(0,0,0,0.65)] transition-colors duration-300">
+    <div class="max-w-xl mx-auto px-4 py-2.5">
+      <div class="flex items-center justify-between gap-2">
+        <!-- 左側：倒數狀態與大字體時間 -->
+        <div class="flex items-center gap-3">
+          <div id="timerStatusDot" class="w-3 h-3 rounded-full bg-slate-600 transition-colors"></div>
+          <div>
+            <div class="flex items-baseline gap-1.5">
+              <span id="timerDisplay" class="text-2xl sm:text-3xl font-black tracking-tight tabular-nums text-white">01:00</span>
+              <span id="timerLabel" class="text-[11px] font-semibold text-slate-400">組間休息待命</span>
+            </div>
+            <!-- 細進度條 -->
+            <div class="w-24 sm:w-28 h-1 bg-slate-800 rounded-full overflow-hidden mt-1">
+              <div id="timerProgressLine" class="h-full bg-sky-400 transition-all duration-200" style="width: 100%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右側：大型單手觸控控制按鈕 -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <button id="timerToggleBtn" type="button" class="min-h-[44px] px-3.5 sm:px-4 rounded-xl bg-sky-500 hover:bg-sky-400 active:scale-95 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-1 shadow-md shadow-sky-500/20 transition">
+            <span id="timerToggleIcon">▶</span>
+            <span id="timerToggleText">開始</span>
+          </button>
+          <button id="timerAdd15Btn" type="button" class="min-h-[44px] px-3 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 text-emerald-400 font-bold text-xs sm:text-sm transition">
+            +15s
+          </button>
+          <button id="timerResetBtn" type="button" class="min-h-[44px] px-3 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 text-slate-300 font-bold text-xs sm:text-sm transition">
+            重設 60s
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 二次確認重置視窗 (Custom Modal，絕不使用 window.confirm) -->
+  <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="bg-[#151F32] border border-slate-700 rounded-2xl max-w-sm w-full p-5 shadow-2xl animate-pop">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base font-extrabold text-white">重置本週訓練進度</h3>
+          <p class="text-xs text-slate-400 mt-0.5">請選擇您要執行的重置方式：</p>
+        </div>
+      </div>
+
+      <div class="space-y-2.5 mt-4">
+        <button id="resetChecksOnlyBtn" type="button" class="w-full min-h-[48px] px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm text-left flex items-center justify-between transition">
+          <div>
+            <div>只清除本週打勾進度</div>
+            <div class="text-[11px] font-semibold text-slate-900/80">保留所有重量、格數與單車阻力紀錄（推薦）</div>
+          </div>
+          <span>→</span>
+        </button>
+
+        <button id="resetAllDataBtn" type="button" class="w-full min-h-[48px] px-4 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 active:scale-[0.99] border border-rose-500/40 text-rose-300 font-bold text-sm text-left flex items-center justify-between transition">
+          <div>
+            <div>全部重置（含重量紀錄）</div>
+            <div class="text-[11px] font-normal text-rose-300/75">清空 Day 1 至 Day 7 所有勾選與輸入數值</div>
+          </div>
+          <span>→</span>
+        </button>
+
+        <button id="closeResetModalBtn" type="button" class="w-full min-h-[44px] mt-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm transition">
+          取消返回
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast 輕提示訊息 -->
+  <div id="toastMsg" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-200">
+    <div class="bg-slate-900/95 border border-emerald-500/40 text-emerald-300 text-xs font-bold px-4 py-2 rounded-full shadow-xl flex items-center gap-2">
+      <span>✓</span>
+      <span id="toastText">已重置本週進度</span>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * 1. 文東路體育館 7 日完整訓練菜單資料庫
+     *    - 嚴格 100% 對應香港東涌文東路體育館官方器械名稱
+     *    - 全部為單做傳統組，附詳細器械調校、動作步驟與體態矯正口訣
+     * =========================================================================
+     */
+    const WORKOUT_PLAN = [
+      {
+        day: 1,
+        shortTitle: 'Day 1',
+        tag: '推 A',
+        title: 'Day 1：上半身「推」A',
+        focus: '主攻：改善圓肩、撐起上胸鎖骨',
+        exercises: [
+          {
+            id: 'd1_e1',
+            type: 'strength',
+            name: '上斜推胸',
+            sets: 4,
+            reps: '8–12 下',
+            machine: '推胸及肩膀推舉機',
+            placeholder: '例如：25kg / 第4格',
+            setup: '將靠背角度調校至約 30–45 度斜角（上斜模式），座椅高度調整至握把與上胸鎖骨位置水平對齊，雙腳平穩踩實地面。',
+            steps: [
+              '1. 起始姿勢：背部與後腦勺緊貼靠背，雙手正握握把，手腕保持中立不折腕。',
+              '2. 向心發力：吐氣時用上胸力量向前上方推出至手肘微曲（切勿完全鎖死關節）。',
+              '3. 離心控制：吸氣時慢速控制（約 2–3 秒）將重量放回，感受上胸充分拉伸。'
+            ],
+            postureCue: '【抗圓肩關鍵】推起時肩胛骨保持後收下沉，切勿聳肩或讓肩膀向前頂出；收下巴使後腦貼緊靠背，避免頭前傾代償。'
+          },
+          {
+            id: 'd1_e2',
+            type: 'strength',
+            name: '反向飛鳥',
+            sets: 4,
+            reps: '12–15 下',
+            machine: '蝶式擴胸機',
+            placeholder: '例如：20kg / 第3格',
+            setup: '將上方左右把柄插銷調至「最入檔」（靠近椅背位置），調整座椅高度使雙手握把時手臂與地面平行、與肩同高，面向椅背反坐並讓胸口貼實軟墊。',
+            steps: [
+              '1. 起始姿勢：胸口緊貼靠墊，雙手握住垂直或水平把柄，手肘保持微曲固定角度。',
+              '2. 向心發力：吐氣時由後三角肌與上背發力，向兩側後方劃弧線拉開把柄至身體兩側。',
+              '3. 離心控制：頂峰停留 1 秒夾緊後肩，吸氣慢速合回，保持重量片不完全相撞。'
+            ],
+            postureCue: '【改善圓肩核心動作】全程主動「沉肩」壓低斜方肌，想像將兩側肩胛骨往中間脊柱夾緊，下巴微收，切忌仰頭借力。'
+          },
+          {
+            id: 'd1_e3',
+            type: 'strength',
+            name: '啞鈴側平舉',
+            sets: 4,
+            reps: '15 下',
+            machine: '啞鈴 (2–20 公斤)',
+            placeholder: '例如：6kg × 2',
+            setup: '於自由重量區選取一對合適重量的「啞鈴 (2–20 公斤)」（建議先由 4–8 kg 開始，確保無斜方肌代償），雙腳與肩同寬站立，膝蓋微曲。',
+            steps: [
+              '1. 起始姿勢：雙手持啞鈴垂於身體兩側略前方，手肘微曲約 15 度，掌心朝內。',
+              '2. 向心發力：吐氣時手肘帶動啞鈴向兩側平舉至與肩膀同高（約 90 度），手腕略低於手肘。',
+              '3. 離心控制：吸氣時用 2 秒慢速下放至大腿外側，保持三角肌中束持續張力。'
+            ],
+            postureCue: '【視覺增闊肩膀】發力前先將肩膀往下沉（遠離耳朵），肋骨下沉並收緊下腹核心，防止腰椎反弓（骨盆前傾）借力甩動。'
+          },
+          {
+            id: 'd1_e4',
+            type: 'strength',
+            name: '繩索三頭下壓',
+            sets: 3,
+            reps: '12–15 下',
+            machine: '多功能訓練器（或改用 二頭肌/三頭肌訓練機）',
+            placeholder: '例如：15kg / 第3格',
+            setup: '使用「多功能訓練器」將滑輪調校至最高檔位並扣上雙頭繩索（如該機繁忙，可改用「二頭肌/三頭肌訓練機」調至三頭下壓模式）。',
+            steps: [
+              '1. 起始姿勢：雙手握緊繩索兩端，上臂緊貼身體兩側垂直固定，前臂與地面平行。',
+              '2. 向心發力：吐氣時保持手肘不動，前臂向下壓直並於最底端將繩索向兩側微微掰開。',
+              '3. 離心控制：吸氣時慢速屈肘回放至前臂略高於水平位置，上臂全程不前後晃動。'
+            ],
+            postureCue: '【收緊拜拜肉】挺胸沉肩，收緊下腹保持骨盆中立，避免身體過度前傾用體重壓下去。'
+          },
+          {
+            id: 'd1_e5',
+            type: 'cardio',
+            name: '有氧：斜路快行',
+            sets: 1,
+            reps: '25–30 分鐘',
+            machine: '跑步機',
+            placeholder: '例如：斜度 9.0 / 5.2 km/h',
+            setup: '踏上「跑步機」，將坡度（Incline）調校至 8.0–10.0，速度（Speed）設定為 5.0–5.5 km/h 快步走，雙手自然擺動或輕扶感應器（切勿死抓扶手）。',
+            steps: [
+              '1. 起始姿勢：視線平視前方螢幕上方，頭頂向上延伸，雙肩自然放鬆下沉。',
+              '2. 步伐執行：腳跟先落地再滾動至前腳掌蹬地，利用臀部與大腿後側發力推進。',
+              '3. 呼吸節奏：保持均勻深呼吸，維持在可說話但微喘的燃脂心率區間 25–30 分鐘。'
+            ],
+            postureCue: '【矯正日常步態】爬坡時切忌低頭看手機或身體前傾趴在扶手上；收緊下腹微捲尾骨，避免斜路行進時腰椎過度受壓。'
+          }
+        ]
+      },
+      {
+        day: 2,
+        shortTitle: 'Day 2',
+        tag: '拉 A',
+        title: 'Day 2：上半身「拉」A',
+        focus: '主攻：矯正頭前傾、建立倒三角',
+        exercises: [
+          {
+            id: 'd2_e1',
+            type: 'strength',
+            name: '寬握高位下拉',
+            sets: 4,
+            reps: '8–12 下',
+            machine: '高拉力機',
+            placeholder: '例如：35kg / 第6格',
+            setup: '坐上「高拉力機」，調低大腿固定海綿墊至緊壓大腿上方（防止身體被重量拉起），雙手以比肩寬約 1.5 倍的寬握距正握長拉桿。',
+            steps: [
+              '1. 起始姿勢：挺胸坐直，軀幹可微向後傾約 10–15 度，雙臂伸直讓背闊肌充分向上延伸。',
+              '2. 向心發力：吐氣時先「沉肩」，再想像用手肘向下往腰側拉，將橫桿拉至上胸鎖骨位置。',
+              '3. 離心控制：吸氣時有控制地讓橫桿慢慢回升至雙臂伸直，保持肩胛穩定不聳肩。'
+            ],
+            postureCue: '【建立倒三角】下拉至最低點時，切勿低頭去湊近橫桿！保持收下巴、頸椎中立，把注意力放在兩側腋下後方（背闊肌）收縮。'
+          },
+          {
+            id: 'd2_e2',
+            type: 'strength',
+            name: '坐姿划船',
+            sets: 4,
+            reps: '10–12 下',
+            machine: '多功能訓練器（或 啞鈴 (2–20 公斤) ＋ 可調式啞鈴椅）',
+            placeholder: '例如：30kg / 第5格',
+            setup: '使用「多功能訓練器」將滑輪調至最低檔位，扣上 V 型窄握把，坐於軟墊或可調椅上雙腳踩穩踏板（若改用啞鈴，則將「可調式啞鈴椅」調平做單臂啞鈴划船）。',
+            steps: [
+              '1. 起始姿勢：膝蓋微曲、腰背挺直立起骨盆，雙手握把向前伸展讓肩胛骨適度前伸。',
+              '2. 向心發力：吐氣時先夾緊肩胛骨，手肘貼近身體兩側向後拉，將握把拉向肚臍上方位置。',
+              '3. 離心控制：頂峰夾背停留 1 秒，吸氣慢速向前還原，上半身不前後大幅搖晃。'
+            ],
+            postureCue: '【改善寒背】拉到終點時胸口主動挺出、雙肩向後打開，同時收緊下腹防止下背過度反弓。'
+          },
+          {
+            id: 'd2_e3',
+            type: 'strength',
+            name: '繩索面拉（Face Pull）',
+            sets: 4,
+            reps: '12–15 下',
+            machine: '多功能訓練器',
+            placeholder: '例如：15kg / 第3格',
+            setup: '使用「多功能訓練器」，將滑輪高度調校至與自己面部（鼻樑／額頭）同高，扣上雙頭繩索，雙手拇指朝向自己（正握或對握）捉緊繩索末端。',
+            steps: [
+              '1. 起始姿勢：後退兩步拉緊鋼索，前後腳站穩，雙臂向前伸直，肩膀下沉。',
+              '2. 向心發力：吐氣時將繩索向眉心兩側拉開，同時雙手向外旋轉（外旋），使大拇指指向後方。',
+              '3. 離心控制：在臉側停留 1 秒感受後肩與中背酸脹，吸氣慢速控制回放至雙臂伸直。'
+            ],
+            postureCue: '【矯正頭前傾王牌動作】拉動時頭頸絕對不可向前伸！主動做「收下巴（擠雙下巴感）」動作，讓後腦勺向後平移對抗重量。'
+          },
+          {
+            id: 'd2_e4',
+            type: 'strength',
+            name: '啞鈴交替彎舉',
+            sets: 3,
+            reps: '10–12 下',
+            machine: '啞鈴 (2–20 公斤)（或改用 二頭肌/三頭肌訓練機）',
+            placeholder: '例如：8kg × 2',
+            setup: '選取一對「啞鈴 (2–20 公斤)」自然站立（或使用「二頭肌/三頭肌訓練機」調至二頭彎舉模式，座椅調至腋下剛好貼合斜墊上緣）。',
+            steps: [
+              '1. 起始姿勢：雙手持啞鈴垂於體側，手肘固定貼近肋骨兩側，掌心朝前或由對握轉為朝上。',
+              '2. 向心發力：吐氣時單側前臂向上彎舉收縮二頭肌，手肘保持在原位不向前抬起。',
+              '3. 離心控制：吸氣時用 2 秒慢速下放至手臂接近伸直，左右交替進行。'
+            ],
+            postureCue: '【杜絕借力】全程夾緊臀部與下腹，鎖定骨盆中立，切勿靠腰部前後甩動將啞鈴擺上去。'
+          },
+          {
+            id: 'd2_e5',
+            type: 'cardio',
+            name: '有氧：高轉速消脂單車',
+            sets: 1,
+            reps: '25–30 分鐘',
+            machine: '單車機',
+            placeholder: '例如：Level 6 / 90 RPM',
+            setup: '調整「單車機」座墊高度至站立時與髖骨（盆骨上緣）同高，坐上後腳踩至最低點時膝蓋保持微曲；阻力（Level）調校至中低檔 Level 6–7。',
+            steps: [
+              '1. 起始姿勢：雙手輕握扶手，背部保持自然挺直不駝背，腳掌前掌踩實腳踏綁帶。',
+              '2. 踩踏節奏：保持輕快流暢的踩踏頻率，將螢幕轉速（RPM）穩定維持在 85–95 RPM。',
+              '3. 持續燃脂：避免用過重阻力硬踩（易令股四頭肌粗壯），以高轉速持續燃脂 25–30 分鐘。'
+            ],
+            postureCue: '【消脂不粗腿】踩單車時易因疲勞而圓肩低頭看錶；請保持沉肩挺胸、收下巴平視前方，核心微收穩定骨盆。'
+          }
+        ]
+      },
+      {
+        day: 3,
+        shortTitle: 'Day 3',
+        tag: '核心矯正',
+        title: 'Day 3：核心修腰 ＋ 骨盆前傾矯正專場',
+        focus: '主攻：縮減肚腩前挺、強化深層腹肌與下背平衡',
+        exercises: [
+          {
+            id: 'd3_e1',
+            type: 'strength',
+            name: '背部伸展',
+            sets: 4,
+            reps: '12–15 下',
+            machine: '背部伸張訓練器',
+            placeholder: '例如：25kg / 第4格',
+            setup: '坐上「背部伸張訓練器」，調整腳踏位置使膝蓋微曲，將後方滾筒靠墊調校至緊貼肩胛骨下方（上背位置），繫好安全帶固定骨盆。',
+            steps: [
+              '1. 起始姿勢：雙手交叉抱胸，身體微微前傾約 30 度，保持脊椎中立不弓背。',
+              '2. 向心發力：吐氣時用下背豎脊肌與臀部力量向後壓動背板，至軀幹挺直（約 100–110 度，勿過度後仰）。',
+              '3. 離心控制：吸氣時慢速控制重量向前還原，全程保持肌肉張力。'
+            ],
+            postureCue: '【穩定骨盆後鏈】向後壓時收緊下腹與臀肌，避免用脖子向後甩頭，保持下巴微收、視線平視。'
+          },
+          {
+            id: 'd3_e2',
+            type: 'strength',
+            name: '上斜捲腹',
+            sets: 4,
+            reps: '15–20 下',
+            machine: '腹肌板',
+            placeholder: '例如：自體重量 / 第2格斜度',
+            setup: '調整「腹肌板」傾斜角度（初階可先調較平緩角度），雙腳勾穩上方泡棉滾筒，仰臥躺下，雙手輕放耳側或交叉置於胸前（切勿雙手抱頭死拉頸部）。',
+            steps: [
+              '1. 起始姿勢：吐氣先讓肋骨向下壓、下背緊貼腹肌板軟墊，消除腰部與板面之間的空隙。',
+              '2. 向心發力：吐氣時想像將胸口捲向肚臍，帶動肩胛骨離開軟墊即可（不需整個人坐直）。',
+              '3. 離心控制：吸氣時一節一節慢速下放背部，肩胛骨輕觸軟墊即開始下一下。'
+            ],
+            postureCue: '【修正骨盆前傾關鍵】下背必須死死貼緊軟墊！如果下放時腰部拱起離墊，代表角度過斜或腹肌失力，請減小下放幅度。'
+          },
+          {
+            id: 'd3_e3',
+            type: 'strength',
+            name: '斜板仰臥抬腿',
+            sets: 4,
+            reps: '12–15 下',
+            machine: '腹肌板',
+            placeholder: '例如：自體重量 / 慢速控制',
+            setup: '頭朝高處躺上「腹肌板」，雙手向後緊捉住上方腳部泡棉滾筒固定上半身，雙腿併攏伸直（或膝蓋微曲降低難度）。',
+            steps: [
+              '1. 起始姿勢：先收緊下腹將下背緊壓在軟墊上，雙腿抬離板面約 15 度準備。',
+              '2. 向心發力：吐氣時用下腹力量將雙腿向上抬起至垂直地面，並在頂端微微將尾骨捲離板面。',
+              '3. 離心控制：吸氣時用 3 秒極慢速下放雙腿，下放至下背快要拱起前即停住並重複。'
+            ],
+            postureCue: '【縮減小腹前挺】這是針對下腹與骨盆後傾的黃金動作！下放雙腿時若感到下腰酸痛，請微曲膝蓋並縮短下放角度。'
+          },
+          {
+            id: 'd3_e4',
+            type: 'strength',
+            name: '轉體腹斜肌訓練',
+            sets: 3,
+            reps: '每邊 15 下',
+            machine: '轉體腹斜肌訓練器',
+            placeholder: '例如：20kg / 第3格',
+            setup: '坐上「轉體腹斜肌訓練器」，雙腿夾緊下方固定墊並調好插銷方向（先做左邊再做右邊），雙手握緊上方手把，胸口緊貼前方軟墊。',
+            steps: [
+              '1. 起始姿勢：上半身保持穩定固定，骨盆與下半身朝向一側起始位置。',
+              '2. 向心發力：吐氣時用腰側腹斜肌發力，帶動下半身向另一側平穩旋轉至極限。',
+              '3. 離心控制：吸氣時慢速控制回放，避免借慣性快速彈回撞擊配重片。'
+            ],
+            postureCue: '【雕琢腰線】上半身保持沉肩、收下巴貼穩胸墊，切勿聳肩或用手臂硬扯把柄。'
+          },
+          {
+            id: 'd3_e5',
+            type: 'cardio',
+            name: '加長版有氧（20m 斜路 ＋ 20m 單車）',
+            sets: 1,
+            reps: '40 分鐘',
+            machine: '跑步機 ＋ 單車機',
+            placeholder: '例如：跑斜8.5 / 車Lv6 90RPM',
+            setup: '前半段 20 分鐘使用「跑步機」（斜度 8.0–9.5，速度 5.0–5.3 km/h）；後半段 20 分鐘無縫轉至「單車機」（阻力 Level 6–7，轉速 85–95 RPM）。',
+            steps: [
+              '1. 0–20 分鐘（跑步機）：啟動全身大肌群與臀腿燃脂，保持步幅穩健、呼吸深長。',
+              '2. 20–40 分鐘（單車機）：減輕膝蓋與下背負擔，維持 85–95 RPM 高轉速持續榨乾脂肪。',
+              '3. 結束緩和：最後 2 分鐘調低阻力慢踩降心率。'
+            ],
+            postureCue: '【全程核心微收】連續 40 分鐘有氧最易在後段出現垂頭圓肩；每 5 分鐘提醒自己「沉肩、收下巴、肚臍微向內收」。'
+          }
+        ]
+      },
+      {
+        day: 4,
+        shortTitle: 'Day 4',
+        tag: '推 B',
+        title: 'Day 4：上半身「推」B',
+        focus: '主攻：立體肩膀 ＋ 上胸輪廓',
+        exercises: [
+          {
+            id: 'd4_e1',
+            type: 'strength',
+            name: '坐姿推肩',
+            sets: 4,
+            reps: '8–12 下',
+            machine: '推胸及肩膀推舉機',
+            placeholder: '例如：20kg / 第3格',
+            setup: '將「推胸及肩膀推舉機」靠背調校至接近垂直（約 85–90 度推肩模式），調整座椅高度使握把位於耳朵與下巴水平高度。',
+            steps: [
+              '1. 起始姿勢：背部與後腦緊貼靠背，雙手握住外側或內側握把，手肘位於手腕正下方。',
+              '2. 向心發力：吐氣時用三角肌前中束將重量垂直向上推起，頂端手肘保持微曲不鎖死。',
+              '3. 離心控制：吸氣時慢速下放至握把回到耳朵兩側高度，保持肩部張力。'
+            ],
+            postureCue: '【防止腰椎代償】推舉時肋骨下沉、下腹收緊讓下背貼實椅背，切勿頂腰拱背；沉肩避免斜方肌過度參與。'
+          },
+          {
+            id: 'd4_e2',
+            type: 'strength',
+            name: '上斜啞鈴推胸',
+            sets: 4,
+            reps: '10–12 下',
+            machine: '啞鈴 (2–20 公斤) ＋ 可調式啞鈴椅',
+            placeholder: '例如：10kg × 2 / 30度椅',
+            setup: '將「可調式啞鈴椅」靠背調校至 30–45 度上斜角（座墊同步微微上翹防止身體下滑），選取一對「啞鈴 (2–20 公斤)」。',
+            steps: [
+              '1. 起始姿勢：雙腳踩實地面，肩胛骨後收下沉緊貼椅背，雙手持啞鈴置於上胸兩側，大臂與軀幹呈約 45–60 度夾角（勿完全打開成 90 度傷肩）。',
+              '2. 向心發力：吐氣時沿垂直地面軌跡向上推起啞鈴至上胸正上方，兩只啞鈴微微靠攏但不相撞。',
+              '3. 離心控制：吸氣時用 2–3 秒慢速下放至啞鈴與上胸同高，充分拉伸上胸肌纖維。'
+            ],
+            postureCue: '【撐起鎖骨線條】全程保持胸口挺起、肩膀下壓遠離耳朵，後腦貼椅收下巴，不抬頭看啞鈴。'
+          },
+          {
+            id: 'd4_e3',
+            type: 'strength',
+            name: '啞鈴側平舉（遞減組）',
+            sets: 4,
+            reps: '12–15 下',
+            machine: '啞鈴 (2–20 公斤)',
+            placeholder: '例如：7kg → 4kg',
+            setup: '在啞鈴架旁準備兩對「啞鈴 (2–20 公斤)」（例如：第一對 6–8 kg 做主組，旁邊放一對輕一級 3–5 kg 作即時遞減補做）。',
+            steps: [
+              '1. 主重量階段：先用較重啞鈴標準完成 10–12 下至接近力竭（不借力甩動）。',
+              '2. 無休息遞減：放下重啞鈴後 3 秒內立即拿起輕一級啞鈴，再補做 6–8 下榨乾三角肌中束。',
+              '3. 完成一組：兩階段合計為 1 組，完成後按下打勾休息 60 秒。'
+            ],
+            postureCue: '【精準孤立中束】越到力竭越容易聳肩與甩腰！請刻意壓低斜方肌、收緊下腹，手肘引領向上平舉。'
+          },
+          {
+            id: 'd4_e4',
+            type: 'strength',
+            name: '蝴蝶機夾胸',
+            sets: 3,
+            reps: '12–15 下',
+            machine: '蝶式擴胸機',
+            placeholder: '例如：25kg / 第4格',
+            setup: '將「蝶式擴胸機」左右把柄調校至「最外檔」（擴胸模式，雙手展開約與身體平行或略後不過度拉扯前肩），調整座椅使握把與胸線同高。',
+            steps: [
+              '1. 起始姿勢：背部與後腦緊貼椅背，沉肩挺胸，雙手握住把柄且手肘保持微曲固定角度。',
+              '2. 向心發力：吐氣時想像雙臂環抱一棵大樹，由胸大肌發力將把柄向胸前正中合攏。',
+              '3. 離心控制：在胸前頂峰擠壓胸肌 1 秒，吸氣慢速打開還原至胸肌有拉伸感即停。'
+            ],
+            postureCue: '【集中胸肌內側】夾胸時肩膀必須向後壓在椅背上，切勿讓雙肩隨著手臂向前圓肩包覆。'
+          },
+          {
+            id: 'd4_e5',
+            type: 'cardio',
+            name: '有氧：斜路快行',
+            sets: 1,
+            reps: '25–30 分鐘',
+            machine: '跑步機',
+            placeholder: '例如：斜度 9.0 / 5.2 km/h',
+            setup: '設定「跑步機」斜度 8.0–10.0、速度 5.0–5.5 km/h，雙手自然擺臂快走。',
+            steps: [
+              '1. 保持穩健大步幅向上快行，感受臀大肌與大腿後側發力。',
+              '2. 維持穩定鼻吸口吐節奏，完成 25–30 分鐘高效低衝擊燃脂。'
+            ],
+            postureCue: '【體態檢視】沉肩、夾背、收下巴、收緊下腹，保持軀幹挺拔向上延伸。'
+          }
+        ]
+      },
+      {
+        day: 5,
+        shortTitle: 'Day 5',
+        tag: '拉 B',
+        title: 'Day 5：上半身「拉」B',
+        focus: '主攻：背部厚度 ＋ 抗圓肩',
+        exercises: [
+          {
+            id: 'd5_e1',
+            type: 'strength',
+            name: '單臂啞鈴划船（較大重量）',
+            sets: 4,
+            reps: '8–10 下',
+            machine: '啞鈴 (2–20 公斤) / (22–40 公斤) ＋ 可調式啞鈴椅',
+            placeholder: '例如：16kg / 每邊',
+            setup: '將「可調式啞鈴椅」調至水平（0 度），從「啞鈴 (2–20 公斤)」或「啞鈴 (22–40 公斤)」選取較具挑戰性的單只啞鈴；左膝與左手撐於長椅上，右腳踩實地面，保持背部平直如桌面。',
+            steps: [
+              '1. 起始姿勢：右手握啞鈴自然垂下，讓右側背闊肌與肩胛骨充分向下延伸（不扭腰）。',
+              '2. 向心發力：吐氣時先沉肩夾背，手肘貼近身體向後上方（朝髖部口袋方向）拉起啞鈴。',
+              '3. 離心控制：頂峰停留 1 秒感受中背厚度收縮，吸氣慢速下放；做完左右兩邊算 1 組。'
+            ],
+            postureCue: '【強化中背抗圓肩】支撐手用力推穩椅面避免塌肩，頸部與脊椎成一直線（視線看椅面前方地面，不抬頭也不垂頭）。'
+          },
+          {
+            id: 'd5_e2',
+            type: 'strength',
+            name: '反手窄握下拉',
+            sets: 4,
+            reps: '10–12 下',
+            machine: '高拉力機',
+            placeholder: '例如：35kg / 第6格',
+            setup: '坐上「高拉力機」固定好大腿海綿墊，雙手掌心朝向自己（反手）、握距與肩同寬握住橫桿。',
+            steps: [
+              '1. 起始姿勢：挺胸沉肩，軀幹微向後傾約 10 度，雙臂向上伸直。',
+              '2. 向心發力：吐氣時手肘貼近身體兩側垂直向下拉，將橫桿拉至上胸鎖骨處，集中刺激下背闊肌。',
+              '3. 離心控制：吸氣時慢速向上還原至手臂伸直，保持肩胛骨下壓不聳肩。'
+            ],
+            postureCue: '【打造背闊下沿線條】下拉時切勿把下巴向前伸去碰橫桿，保持收下巴、挺胸打開鎖骨。'
+          },
+          {
+            id: 'd5_e3',
+            type: 'strength',
+            name: '反向飛鳥',
+            sets: 4,
+            reps: '15 下',
+            machine: '蝶式擴胸機',
+            placeholder: '例如：20kg / 第3格',
+            setup: '將「蝶式擴胸機」把柄插銷調至最入檔，面向椅背反坐並讓胸口貼緊靠墊，雙手握把與肩同高。',
+            steps: [
+              '1. 起始姿勢：雙臂向前微曲伸展，肩膀下沉遠離耳朵。',
+              '2. 向心發力：吐氣時由後三角肌與菱形肌發力向後展臂拉開把柄，夾緊雙側肩胛骨。',
+              '3. 離心控制：吸氣時用 2–3 秒慢速合回，保持後肩持續燃燒感。'
+            ],
+            postureCue: '【鞏固抗圓肩效果】全程壓低斜方肌（沉肩），後腦勺微向後收，感受肩胛骨內側與後肩同步收緊。'
+          },
+          {
+            id: 'd5_e4',
+            type: 'strength',
+            name: '啞鈴錘式彎舉',
+            sets: 3,
+            reps: '12 下',
+            machine: '啞鈴 (2–20 公斤)',
+            placeholder: '例如：8kg × 2',
+            setup: '選取一對「啞鈴 (2–20 公斤)」，雙手掌心相對（如同握錘子姿勢）垂於身體兩側站立。',
+            steps: [
+              '1. 起始姿勢：雙腳與肩同寬，夾緊臀部與下腹，手肘鎖定於肋骨兩側。',
+              '2. 向心發力：吐氣時保持掌心相對，前臂向上彎舉至二頭肌與前臂肱橈肌充分收縮。',
+              '3. 離心控制：吸氣時慢速下放回體側，全程手肘不向前擺動。'
+            ],
+            postureCue: '【修飾手臂線條】站立時收緊下腹避免骨盆前傾頂腰，雙肩向後打開不圓肩。'
+          },
+          {
+            id: 'd5_e5',
+            type: 'cardio',
+            name: '有氧：高轉速消脂單車',
+            sets: 1,
+            reps: '25–30 分鐘',
+            machine: '單車機',
+            placeholder: '例如：Level 6–7 / 90 RPM',
+            setup: '調整「單車機」座墊高度與髖骨齊平，阻力設定在 Level 6–7，維持高轉速 85–95 RPM。',
+            steps: [
+              '1. 保持輕快均勻畫圓踩踏，專注維持轉速於 85–95 RPM 區間。',
+              '2. 完成 25–30 分鐘高效有氧消脂，結束後慢踩 1–2 分鐘緩和。'
+            ],
+            postureCue: '【上身放鬆不聳肩】雙手輕搭扶手，沉肩挺胸，收下巴平視前方。'
+          }
+        ]
+      },
+      {
+        day: 6,
+        shortTitle: 'Day 6',
+        tag: '補漏燃脂',
+        title: 'Day 6：上半身補漏 ＋ 核心燃脂',
+        focus: '主攻：單做傳統組全面鞏固上肢線條與腰腹緊緻',
+        exercises: [
+          {
+            id: 'd6_e1',
+            type: 'strength',
+            name: '上斜推胸',
+            sets: 3,
+            reps: '12 下',
+            machine: '推胸及肩膀推舉機',
+            placeholder: '例如：25kg / 第4格',
+            setup: '將「推胸及肩膀推舉機」靠背調校至 30–45 度上斜角，座椅調至握把對齊上胸。',
+            steps: [
+              '1. 肩胛後收下沉緊貼靠背，吐氣用上胸發力向前上方推出。',
+              '2. 吸氣慢速控制回放，完成 3 組 × 12 下高質量刺激。'
+            ],
+            postureCue: '【沉肩夾背】推起時肩膀不前伸，後腦貼緊靠背收下巴。'
+          },
+          {
+            id: 'd6_e2',
+            type: 'strength',
+            name: '寬握高位下拉',
+            sets: 3,
+            reps: '12 下',
+            machine: '高拉力機',
+            placeholder: '例如：35kg / 第6格',
+            setup: '坐上「高拉力機」固定大腿墊，寬握長橫桿。',
+            steps: [
+              '1. 先沉肩啟動背闊肌，將橫桿穩定拉向鎖骨上方。',
+              '2. 慢速控制回升至雙臂伸直，完成 3 組 × 12 下。'
+            ],
+            postureCue: '【收下巴不前傾】下拉時頭部保持中立，感受兩側背肌寬度拉伸。'
+          },
+          {
+            id: 'd6_e3',
+            type: 'strength',
+            name: '反向飛鳥',
+            sets: 3,
+            reps: '15 下',
+            machine: '蝶式擴胸機',
+            placeholder: '例如：20kg / 第3格',
+            setup: '將「蝶式擴胸機」把柄調至最入檔，面向椅背反坐貼實胸墊。',
+            steps: [
+              '1. 手肘微曲向兩側後方劃弧拉開把柄，頂峰夾緊後肩 1 秒。',
+              '2. 慢速合回，完成 3 組 × 15 下強化後三角肌。'
+            ],
+            postureCue: '【對抗圓肩】全程壓低斜方肌（沉肩），不聳肩借力。'
+          },
+          {
+            id: 'd6_e4',
+            type: 'strength',
+            name: '啞鈴側平舉',
+            sets: 3,
+            reps: '15 下',
+            machine: '啞鈴 (2–20 公斤)',
+            placeholder: '例如：6kg × 2',
+            setup: '選取一對「啞鈴 (2–20 公斤)」，雙腳與肩同寬站立，手肘微曲。',
+            steps: [
+              '1. 吐氣時手肘帶動啞鈴向兩側平舉至肩高，不聳肩。',
+              '2. 吸氣慢速下放，完成 3 組 × 15 下雕塑肩膀輪廓。'
+            ],
+            postureCue: '【收緊下腹】保持肋骨下沉與骨盆中立，不靠腰部擺動。'
+          },
+          {
+            id: 'd6_e5',
+            type: 'strength',
+            name: '轉體腹斜肌訓練',
+            sets: 3,
+            reps: '每邊 15 下',
+            machine: '轉體腹斜肌訓練器',
+            placeholder: '例如：20kg / 第3格',
+            setup: '坐上「轉體腹斜肌訓練器」，胸口貼穩前方靠墊，雙腿夾緊固定墊。',
+            steps: [
+              '1. 慢速控制腰側腹斜肌發力轉體，頂峰微停感受側腹收緊。',
+              '2. 左右兩邊各完成 15 下為 1 組，共 3 組。'
+            ],
+            postureCue: '【穩定上身】沉肩貼緊胸墊，只讓腰腹帶動旋轉。'
+          },
+          {
+            id: 'd6_e6',
+            type: 'cardio',
+            name: '有氧運動（自選器械）',
+            sets: 1,
+            reps: '30 分鐘',
+            machine: '橢圓運轉機 或 弧步運轉機 或 跑步機（斜路快行）',
+            placeholder: '例如：橢圓機 Lv7 / 30m',
+            setup: '依當日關節狀態與人流，任選「橢圓運轉機」、「弧步運轉機」（零衝擊全身燃脂，腳跟全程踩實踏板）或「跑步機」（斜度 8.0–10.0、速度 5.0–5.5 km/h）。',
+            steps: [
+              '1. 保持均勻穩定的步頻與呼吸節奏，持續運動 30 分鐘。',
+              '2. 若選用橢圓／弧步運轉機，雙手輕握活動扶手配合推拉，提升熱量消耗。'
+            ],
+            postureCue: '【挺拔體態】視線平視前方，沉肩、收下巴、收緊下腹，不低頭看手機。'
+          }
+        ]
+      },
+      {
+        day: 7,
+        shortTitle: 'Day 7',
+        tag: '休息修復',
+        title: 'Day 7：完全休息與體態伸展日',
+        focus: '主攻：肌肉超量恢復、放鬆緊繃胸肌與髖屈肌',
+        isRestDay: true,
+        exercises: [
+          {
+            id: 'd7_e1',
+            type: 'cardio',
+            name: '胸大肌與肩前側伸展（改善圓肩）',
+            sets: 1,
+            reps: '左右各 30 秒 × 3 組',
+            machine: '拉筋機（或在家利用牆角／門框）',
+            placeholder: '例如：已伸展 3 組 / 酸爽放鬆',
+            setup: '若當日經過文東路體育館可使用場內「拉筋機」進行上肢與胸背伸展；若在家休息，可站於牆角或門框旁，單臂屈肘 90 度將前臂貼於牆面。',
+            steps: [
+              '1. 身體慢慢向前及向對側微轉，直至感到胸大肌與肩膀前側有溫和牽拉感（切勿劇痛）。',
+              '2. 保持深長慢呼吸停留 30 秒，左右交替各做 3 組。'
+            ],
+            postureCue: '【釋放圓肩張力】伸展時主動將被拉伸那側的肩膀往下沉，同時微收下巴。'
+          },
+          {
+            id: 'd7_e2',
+            type: 'cardio',
+            name: '髖屈肌與髂腰肌伸展（矯正骨盆前傾）',
+            sets: 1,
+            reps: '左右各 30 秒 × 3 組',
+            machine: '拉筋機（或在家瑜伽墊弓箭步伸展）',
+            placeholder: '例如：已伸展 3 組 / 髖部放鬆',
+            setup: '使用體育館「拉筋機」伸展髖部與大腿前側，或於家中墊上採「單膝跪地弓箭步」（後膝下方墊毛巾保護）。',
+            steps: [
+              '1. 雙手叉腰，先收緊下腹並夾緊後方臀部（主動做出骨盆後傾動作）。',
+              '2. 保持腰背挺直，重心微微向前推，感受後方大腿根部前側（髂腰肌）深層拉開，停留 30 秒。'
+            ],
+            postureCue: '【消除骨盆前傾元兇】切忌挺腰向前頂！必須先「收緊下腹＋夾屁股」再微推重心，才能精準拉鬆緊繃的髖屈肌。'
+          },
+          {
+            id: 'd7_e3',
+            type: 'cardio',
+            name: '上斜方肌與枕下肌群放鬆（緩解頭前傾）',
+            sets: 1,
+            reps: '左右各 30 秒 × 2 組',
+            machine: '徒手居家放鬆',
+            placeholder: '例如：已完成肩頸放鬆',
+            setup: '端坐於椅子上，右手輕扶椅子邊緣固定右肩下沉，左手輕輕搭在頭部右側。',
+            steps: [
+              '1. 吐氣時左手輕柔將頭部向左側傾斜，感受右側頸側至肩膀上緣放鬆，停留 30 秒。',
+              '2. 接著下巴微轉向左側鎖骨方向再停留 20 秒，左右換邊重複。'
+            ],
+            postureCue: '【減壓頸椎】全程保持被伸展側肩膀下沉，動作輕柔緩慢不硬扯。'
+          },
+          {
+            id: 'd7_e4',
+            type: 'cardio',
+            name: '7–8 小時充足睡眠與營養修復',
+            sets: 1,
+            reps: '7–8 小時',
+            machine: '居家修復',
+            placeholder: '例如：睡足 7.5 小時 / 補充足夠蛋白質',
+            setup: '肌肉在休息與深度睡眠期間才會真正修復成長；睡前 30 分鐘減少低頭滑手機，調整枕頭高度使頸椎保持自然中立。',
+            steps: [
+              '1. 確保全日攝取充足優質蛋白質（每公斤體重約 1.4–1.6g）與 2000ml 以上水分。',
+              '2. 享受完整 7–8 小時優質睡眠，為下一週文東路體育館訓練儲備能量！'
+            ],
+            postureCue: '【睡眠體態】仰睡時可在膝蓋下方墊一個薄枕頭，能大幅減輕骨盆前傾帶來的下背壓力。'
+          }
+        ]
+      }
+    ];
+
+    /**
+     * =========================================================================
+     * 2. 狀態管理與 localStorage 持久化
+     * =========================================================================
+     */
+    const STORAGE_KEY = 'man_tung_road_gym_tracker_v1';
+
+    // 預設狀態結構
+    let appState = {
+      activeDay: 1,
+      checks: {},   // 例如: { "d1_e1_0": true, "d1_e1_1": true }
+      weights: {},  // 例如: { "d1_e1": "25kg / 第4格" }
+      expanded: {}  // 記錄折疊面板展開狀態（重新整理不強迫儲存亦可，這裡存於記憶體）
+    };
+
+    // 從 localStorage 讀取
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          appState.activeDay = parsed.activeDay || 1;
+          appState.checks = parsed.checks || {};
+          appState.weights = parsed.weights || {};
+        }
+      } catch (err) {
+        console.warn('讀取 localStorage 失敗，使用預設狀態:', err);
+      }
+    }
+
+    // 儲存至 localStorage
+    function saveState() {
+      try {
+        const payload = {
+          activeDay: appState.activeDay,
+          checks: appState.checks,
+          weights: appState.weights
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (err) {
+        console.warn('儲存 localStorage 失敗:', err);
+      }
+    }
+
+    /**
+     * =========================================================================
+     * 3. Web Audio API 內建合成提示音與震動提醒（免外部音檔）
+     * =========================================================================
+     */
+    let audioCtx = null;
+
+    function initAudioContext() {
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            audioCtx = new AudioContextClass();
+          }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      } catch (e) {
+        // 忽略不支援音訊的環境
+      }
+    }
+
+    // 播放清脆提示音（freq: 頻率Hz, duration: 秒, delay: 延遲秒）
+    function playBeep(freq = 880, duration = 0.14, delay = 0, gainVal = 0.22) {
+      try {
+        initAudioContext();
+        if (!audioCtx) return;
+
+        const now = audioCtx.currentTime + delay;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(gainVal, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + duration + 0.02);
+      } catch (e) {
+        // 靜音環境安全降級
+      }
+    }
+
+    // 倒數結束雙響提示＋手機震動＋視覺閃動
+    function triggerTimerFinishAlert() {
+      playBeep(880, 0.16, 0, 0.28);
+      playBeep(1174.66, 0.28, 0.2, 0.32); // D6 清脆雙響
+      if (navigator.vibrate) {
+        try {
+          navigator.vibrate([200, 100, 250]);
+        } catch (e) {}
+      }
+      const timerBar = document.getElementById('timerBar');
+      timerBar.classList.remove('animate-flash-border');
+      void timerBar.offsetWidth; // 觸發重繪以重新播放動畫
+      timerBar.classList.add('animate-flash-border');
+    }
+
+    /**
+     * =========================================================================
+     * 4. 底部懸浮 60 秒組間休息計時器邏輯
+     * =========================================================================
+     */
+    const DEFAULT_REST_SECONDS = 60;
+    let timerTotal = DEFAULT_REST_SECONDS;
+    let timerRemaining = DEFAULT_REST_SECONDS;
+    let timerInterval = null;
+    let isTimerRunning = false;
+
+    const timerDisplayEl = document.getElementById('timerDisplay');
+    const timerLabelEl = document.getElementById('timerLabel');
+    const timerStatusDotEl = document.getElementById('timerStatusDot');
+    const timerProgressLineEl = document.getElementById('timerProgressLine');
+    const timerToggleBtn = document.getElementById('timerToggleBtn');
+    const timerToggleIcon = document.getElementById('timerToggleIcon');
+    const timerToggleText = document.getElementById('timerToggleText');
+    const timerAdd15Btn = document.getElementById('timerAdd15Btn');
+    const timerResetBtn = document.getElementById('timerResetBtn');
+
+    function formatSeconds(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function updateTimerUI() {
+      timerDisplayEl.textContent = formatSeconds(timerRemaining);
+      const pct = Math.max(0, Math.min(100, (timerRemaining / timerTotal) * 100));
+      timerProgressLineEl.style.width = `${pct}%`;
+
+      if (isTimerRunning) {
+        timerToggleIcon.textContent = '⏸';
+        timerToggleText.textContent = '暫停';
+        timerToggleBtn.className = 'min-h-[44px] px-3.5 sm:px-4 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-1 shadow-md shadow-amber-500/20 transition';
+        timerStatusDotEl.className = 'w-3 h-3 rounded-full bg-emerald-400 animate-ping';
+        timerLabelEl.textContent = '組間休息倒數中...';
+        timerLabelEl.className = 'text-[11px] font-bold text-emerald-400';
+        timerDisplayEl.className = timerRemaining <= 5
+          ? 'text-2xl sm:text-3xl font-black tracking-tight tabular-nums text-amber-400'
+          : 'text-2xl sm:text-3xl font-black tracking-tight tabular-nums text-white';
+      } else {
+        timerToggleIcon.textContent = '▶';
+        timerToggleText.textContent = timerRemaining === 0 ? '重來' : '開始';
+        timerToggleBtn.className = 'min-h-[44px] px-3.5 sm:px-4 rounded-xl bg-sky-500 hover:bg-sky-400 active:scale-95 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-1 shadow-md shadow-sky-500/20 transition';
+        timerStatusDotEl.className = timerRemaining === 0
+          ? 'w-3 h-3 rounded-full bg-emerald-400'
+          : 'w-3 h-3 rounded-full bg-slate-600';
+        timerLabelEl.textContent = timerRemaining === 0 ? '休息結束！準備下一組' : '組間休息待命';
+        timerLabelEl.className = timerRemaining === 0
+          ? 'text-[11px] font-extrabold text-emerald-400'
+          : 'text-[11px] font-semibold text-slate-400';
+        timerDisplayEl.className = timerRemaining === 0
+          ? 'text-2xl sm:text-3xl font-black tracking-tight tabular-nums text-emerald-400'
+          : 'text-2xl sm:text-3xl font-black tracking-tight tabular-nums text-white';
+      }
+    }
+
+    function startRestTimer(seconds = DEFAULT_REST_SECONDS) {
+      initAudioContext();
+      clearInterval(timerInterval);
+      timerTotal = seconds;
+      timerRemaining = seconds;
+      isTimerRunning = true;
+      updateTimerUI();
+
+      timerInterval = setInterval(() => {
+        if (timerRemaining > 0) {
+          timerRemaining -= 1;
+          // 最後 3、2、1 秒輕聲提示
+          if (timerRemaining > 0 && timerRemaining <= 3) {
+            playBeep(660, 0.08, 0, 0.14);
+          }
+          if (timerRemaining === 0) {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            triggerTimerFinishAlert();
+          }
+          updateTimerUI();
+        }
+      }, 1000);
+    }
+
+    function toggleTimer() {
+      initAudioContext();
+      if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        updateTimerUI();
+      } else {
+        if (timerRemaining <= 0) {
+          startRestTimer(DEFAULT_REST_SECONDS);
+          return;
+        }
+        isTimerRunning = true;
+        updateTimerUI();
+        timerInterval = setInterval(() => {
+          if (timerRemaining > 0) {
+            timerRemaining -= 1;
+            if (timerRemaining > 0 && timerRemaining <= 3) {
+              playBeep(660, 0.08, 0, 0.14);
+            }
+            if (timerRemaining === 0) {
+              clearInterval(timerInterval);
+              isTimerRunning = false;
+              triggerTimerFinishAlert();
+            }
+            updateTimerUI();
+          }
+        }, 1000);
+      }
+    }
+
+    function add15Seconds() {
+      initAudioContext();
+      timerRemaining += 15;
+      if (timerRemaining > timerTotal) {
+        timerTotal = timerRemaining;
+      }
+      updateTimerUI();
+    }
+
+    function resetTimerTo60() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      timerTotal = DEFAULT_REST_SECONDS;
+      timerRemaining = DEFAULT_REST_SECONDS;
+      updateTimerUI();
+    }
+
+    timerToggleBtn.addEventListener('click', toggleTimer);
+    timerAdd15Btn.addEventListener('click', add15Seconds);
+    timerResetBtn.addEventListener('click', resetTimerTo60);
+
+    /**
+     * =========================================================================
+     * 5. 進度計算與 UI 渲染引擎
+     * =========================================================================
+     */
+    function getDayProgress(dayObj) {
+      let totalSets = 0;
+      let completedSets = 0;
+      dayObj.exercises.forEach(ex => {
+        totalSets += ex.sets;
+        for (let i = 0; i < ex.sets; i++) {
+          if (appState.checks[`${ex.id}_${i}`]) {
+            completedSets += 1;
+          }
+        }
+      });
+      const percentage = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
+      return { completedSets, totalSets, percentage };
+    }
+
+    // 渲染頂部 Day 1 - Day 7 橫向分頁
+    function renderDayTabs() {
+      const container = document.getElementById('dayTabsContainer');
+      container.innerHTML = '';
+
+      WORKOUT_PLAN.forEach(dayObj => {
+        const isActive = dayObj.day === appState.activeDay;
+        const { completedSets, totalSets, percentage } = getDayProgress(dayObj);
+        const isDayDone = totalSets > 0 && completedSets === totalSets;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.day = dayObj.day;
+        btn.className = isActive
+          ? 'shrink-0 min-h-[44px] px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-500 to-emerald-500 text-slate-950 font-extrabold text-xs sm:text-sm shadow-md shadow-sky-500/20 flex items-center gap-1.5 transition'
+          : 'shrink-0 min-h-[44px] px-3.5 py-1.5 rounded-xl bg-[#151F32] hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold text-xs sm:text-sm flex items-center gap-1.5 transition';
+
+        // 狀態小點或完成打勾
+        let statusBadge = '';
+        if (isDayDone) {
+          statusBadge = `<span class="inline-flex items-center justify-center w-4 h-4 rounded-full ${isActive ? 'bg-slate-950 text-emerald-400' : 'bg-emerald-500/20 text-emerald-400'} text-[10px] font-black">✓</span>`;
+        } else if (completedSets > 0) {
+          statusBadge = `<span class="w-2 h-2 rounded-full ${isActive ? 'bg-slate-950' : 'bg-amber-400'}"></span>`;
+        }
+
+        btn.innerHTML = `
+          <span>${dayObj.shortTitle}</span>
+          <span class="text-[11px] ${isActive ? 'text-slate-900/85 font-bold' : 'text-slate-400 font-medium'}">${dayObj.tag}</span>
+          ${statusBadge}
+        `;
+
+        btn.addEventListener('click', () => {
+          appState.activeDay = dayObj.day;
+          saveState();
+          renderAll();
+          // 自動將點擊的分頁滾動至視窗中央
+          btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        });
+
+        container.appendChild(btn);
+      });
+    }
+
+    // 更新頂部進度條與標題
+    function updateHeaderDashboard() {
+      const currentDayObj = WORKOUT_PLAN.find(d => d.day === appState.activeDay) || WORKOUT_PLAN[0];
+      const { completedSets, totalSets, percentage } = getDayProgress(currentDayObj);
+
+      document.getElementById('dayTitle').textContent = currentDayObj.title;
+      document.getElementById('dayFocusText').textContent = currentDayObj.focus;
+      document.getElementById('progressText').textContent = `已完成 ${completedSets} / ${totalSets} 組 · ${percentage}%`;
+      document.getElementById('progressBar').style.width = `${percentage}%`;
+    }
+
+    // 渲染當日所有訓練動作卡片
+    function renderWorkoutCards() {
+      const container = document.getElementById('workoutContainer');
+      const currentDayObj = WORKOUT_PLAN.find(d => d.day === appState.activeDay) || WORKOUT_PLAN[0];
+      container.innerHTML = '';
+
+      // 若為休息日，頂部加上溫馨修復提示橫幅
+      if (currentDayObj.isRestDay) {
+        const restBanner = document.createElement('div');
+        restBanner.className = 'bg-gradient-to-r from-emerald-500/15 via-sky-500/10 to-slate-900 border border-emerald-500/30 rounded-2xl p-4 flex items-start gap-3';
+        restBanner.innerHTML = `
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-lg">🌿</div>
+          <div>
+            <h3 class="text-sm font-extrabold text-emerald-300">主動恢復與體態重塑日</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mt-1">
+              無需進行大重量訓練。如當日經過東涌文東路體育館，可使用場內 <span class="text-sky-400 font-bold">拉筋機</span> 放鬆胸背與髖部；或依下方清單在家伸展，配合 7–8 小時充足睡眠。
+            </p>
+          </div>
+        `;
+        container.appendChild(restBanner);
+      }
+
+      currentDayObj.exercises.forEach((ex, index) => {
+        const isCardio = ex.type === 'cardio';
+        const savedWeight = appState.weights[ex.id] || '';
+        const isExpanded = !!appState.expanded[ex.id];
+
+        // 檢查該動作是否全部完成
+        let exCompletedCount = 0;
+        for (let s = 0; s < ex.sets; s++) {
+          if (appState.checks[`${ex.id}_${s}`]) exCompletedCount++;
+        }
+        const isExAllDone = exCompletedCount === ex.sets;
+
+        const card = document.createElement('article');
+        card.className = `rounded-2xl border transition-all duration-200 ${
+          isExAllDone
+            ? 'bg-[#13232C] border-emerald-500/45 shadow-lg shadow-emerald-950/30'
+            : 'bg-[#151F32] border-slate-800 shadow-md'
+        }`;
+
+        // 構建組數打勾按鈕 HTML
+        let setsHtml = '';
+        if (isCardio) {
+          const checkKey = `${ex.id}_0`;
+          const isChecked = !!appState.checks[checkKey];
+          const btnLabel = currentDayObj.isRestDay ? '完成此項伸展／修復' : '完成有氧訓練';
+          setsHtml = `
+            <button type="button" data-check-key="${checkKey}" data-ex-type="cardio"
+              class="set-check-btn w-full min-h-[48px] px-4 py-2.5 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 transition active:scale-[0.98] ${
+                isChecked
+                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25 animate-pop'
+                  : 'bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-200'
+              }">
+              <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs ${isChecked ? 'bg-slate-950 text-emerald-400' : 'border border-slate-500 text-transparent'}">✓</span>
+              <span>${isChecked ? '已完成 ✓' : btnLabel}</span>
+            </button>
+          `;
+        } else {
+          const buttons = [];
+          for (let s = 0; s < ex.sets; s++) {
+            const checkKey = `${ex.id}_${s}`;
+            const isChecked = !!appState.checks[checkKey];
+            buttons.push(`
+              <button type="button" data-check-key="${checkKey}" data-ex-type="strength"
+                class="set-check-btn min-h-[48px] px-2 py-2 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition active:scale-95 ${
+                  isChecked
+                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/25 animate-pop'
+                    : 'bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-200'
+                }">
+                <span class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${isChecked ? 'bg-slate-950 text-emerald-400' : 'border border-slate-500 text-transparent'}">✓</span>
+                <span>第 ${s + 1} 組</span>
+              </button>
+            `);
+          }
+          setsHtml = `<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">${buttons.join('')}</div>`;
+        }
+
+        // 步驟列表 HTML
+        const stepsListHtml = ex.steps.map(step => `<li class="text-xs sm:text-[13px] text-slate-300 leading-relaxed">${step}</li>`).join('');
+
+        card.innerHTML = `
+          <div class="p-4">
+            <!-- 卡片標頭：序號、動作名稱、組數×次數標籤 -->
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-start gap-2.5 min-w-0">
+                <span class="w-7 h-7 rounded-lg ${isExAllDone ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-sky-400 border border-slate-700'} font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+                  ${isExAllDone ? '✓' : index + 1}
+                </span>
+                <div class="min-w-0">
+                  <h3 class="text-base sm:text-lg font-extrabold text-white leading-snug">${ex.name}</h3>
+                  <!-- 文東路官方器械高亮標籤 -->
+                  <div class="mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-500/12 border border-sky-500/30 text-sky-300 text-xs font-bold">
+                    <svg class="w-3.5 h-3.5 text-sky-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>${ex.machine}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 目標組數次數徽章 -->
+              <span class="shrink-0 px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-extrabold text-emerald-400">
+                ${isCardio ? ex.reps : `${ex.sets} 組 × ${ex.reps}`}
+              </span>
+            </div>
+
+            <!-- 重量 / 阻力 / 參數紀錄輸入欄 -->
+            <div class="mt-3.5 bg-[#0E1624] rounded-xl p-2.5 border border-slate-800/90 flex items-center gap-2.5">
+              <label for="weight_${ex.id}" class="text-xs font-bold text-slate-400 shrink-0 flex items-center gap-1">
+                <span>⚖️</span>
+                <span>${isCardio ? '參數／備註' : '重量／格數'}</span>
+              </label>
+              <input id="weight_${ex.id}" type="text" data-ex-id="${ex.id}"
+                value="${savedWeight.replace(/"/g, '&quot;')}"
+                placeholder="${ex.placeholder}"
+                class="weight-input w-full bg-slate-900/90 text-white placeholder-slate-500 text-sm font-bold px-3 py-2 rounded-lg border border-slate-700 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400 transition"
+              />
+            </div>
+
+            <!-- 逐組打勾紀錄按鈕群 -->
+            <div class="mt-3.5">
+              ${setsHtml}
+            </div>
+
+            <!-- 可展開的「📖 器械調校與動作步驟」折疊按鈕 -->
+            <div class="mt-3.5 pt-3 border-t border-slate-800/80">
+              <button type="button" data-toggle-ex="${ex.id}"
+                class="accordion-toggle-btn w-full min-h-[44px] px-3 py-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/80 flex items-center justify-between text-xs sm:text-sm font-bold text-sky-300 transition">
+                <span class="flex items-center gap-1.5">
+                  <span>📖</span>
+                  <span>器械調校與動作步驟（含體態矯正）</span>
+                </span>
+                <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- 折疊內容面板 -->
+              <div id="accordion_${ex.id}" class="accordion-content ${isExpanded ? 'open' : ''}">
+                <div class="accordion-inner">
+                  <div class="mt-3 space-y-3 bg-[#0E1624] rounded-xl p-3.5 border border-slate-800">
+                    <!-- 1. 官方器械名稱 -->
+                    <div>
+                      <div class="text-[11px] font-extrabold uppercase tracking-wider text-sky-400 mb-1">① 文東路官方器械</div>
+                      <div class="text-xs sm:text-sm font-bold text-white">${ex.machine}</div>
+                    </div>
+
+                    <!-- 2. 器械調校方法 -->
+                    <div>
+                      <div class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-400 mb-1">② 器械座椅／滑輪／把柄調校</div>
+                      <p class="text-xs sm:text-[13px] text-slate-300 leading-relaxed">${ex.setup}</p>
+                    </div>
+
+                    <!-- 3. 分步動作教學 -->
+                    <div>
+                      <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 mb-1">③ 分步動作執行教學</div>
+                      <ul class="space-y-1.5">
+                        ${stepsListHtml}
+                      </ul>
+                    </div>
+
+                    <!-- 4. 體態矯正發力口訣 -->
+                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
+                      <div class="text-[11px] font-extrabold text-amber-400 flex items-center gap-1 mb-1">
+                        <span>⚠️</span>
+                        <span>④ 體態矯正發力口訣（防代償）</span>
+                      </div>
+                      <p class="text-xs sm:text-[13px] text-amber-100/95 font-medium leading-relaxed">${ex.postureCue}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      bindCardEvents();
+    }
+
+    // 綁定卡片內的動態互動事件
+    function bindCardEvents() {
+      // 1. 逐組打勾事件
+      document.querySelectorAll('.set-check-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const checkKey = btn.dataset.checkKey;
+          const exType = btn.dataset.exType;
+          const wasChecked = !!appState.checks[checkKey];
+          const nowChecked = !wasChecked;
+
+          if (nowChecked) {
+            appState.checks[checkKey] = true;
+            // 若為重訓動作打勾，自動啟動底部 60 秒組間休息倒數
+            if (exType === 'strength') {
+              startRestTimer(DEFAULT_REST_SECONDS);
+            }
+          } else {
+            delete appState.checks[checkKey];
+          }
+
+          saveState();
+          renderDayTabs();
+          updateHeaderDashboard();
+          renderWorkoutCards();
+        });
+      });
+
+      // 2. 重量／阻力輸入框即時自動儲存
+      document.querySelectorAll('.weight-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const exId = e.target.dataset.exId;
+          appState.weights[exId] = e.target.value;
+          saveState();
+        });
+      });
+
+      // 3. 折疊面板展開／收合
+      document.querySelectorAll('.accordion-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const exId = btn.dataset.toggleEx;
+          const isOpen = !!appState.expanded[exId];
+          appState.expanded[exId] = !isOpen;
+
+          const panel = document.getElementById(`accordion_${exId}`);
+          const arrow = btn.querySelector('svg');
+          if (panel) {
+            panel.classList.toggle('open', !isOpen);
+          }
+          if (arrow) {
+            arrow.classList.toggle('rotate-180', !isOpen);
+          }
+        });
+      });
+    }
+
+    function renderAll() {
+      renderDayTabs();
+      updateHeaderDashboard();
+      renderWorkoutCards();
+    }
+
+    /**
+     * =========================================================================
+     * 6. 重置本週進度視窗與 Toast 提示邏輯
+     * =========================================================================
+     */
+    const resetModal = document.getElementById('resetModal');
+    const openResetModalBtn = document.getElementById('openResetModalBtn');
+    const closeResetModalBtn = document.getElementById('closeResetModalBtn');
+    const resetChecksOnlyBtn = document.getElementById('resetChecksOnlyBtn');
+    const resetAllDataBtn = document.getElementById('resetAllDataBtn');
+
+    function showToast(message) {
+      const toast = document.getElementById('toastMsg');
+      const toastText = document.getElementById('toastText');
+      toastText.textContent = message;
+      toast.classList.remove('opacity-0');
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+      }, 2400);
+    }
+
+    openResetModalBtn.addEventListener('click', () => {
+      resetModal.classList.remove('hidden');
+      resetModal.classList.add('flex');
+    });
+
+    closeResetModalBtn.addEventListener('click', () => {
+      resetModal.classList.add('hidden');
+      resetModal.classList.remove('flex');
+    });
+
+    resetModal.addEventListener('click', (e) => {
+      if (e.target === resetModal) {
+        resetModal.classList.add('hidden');
+        resetModal.classList.remove('flex');
+      }
+    });
+
+    // 只清除本週打勾進度（保留重量紀錄）
+    resetChecksOnlyBtn.addEventListener('click', () => {
+      appState.checks = {};
+      saveState();
+      resetTimerTo60();
+      renderAll();
+      resetModal.classList.add('hidden');
+      resetModal.classList.remove('flex');
+      showToast('已清除本週打勾進度，重量紀錄已保留');
+    });
+
+    // 全部重置（含重量紀錄）
+    resetAllDataBtn.addEventListener('click', () => {
+      appState.checks = {};
+      appState.weights = {};
+      saveState();
+      resetTimerTo60();
+      renderAll();
+      resetModal.classList.add('hidden');
+      resetModal.classList.remove('flex');
+      showToast('已全部重置本週進度與重量紀錄');
+    });
+
+    /**
+     * =========================================================================
+     * 7. 應用程式初始化啟動
+     * =========================================================================
+     */
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      renderAll();
+      updateTimerUI();
+
+      // 初次載入時將目前選中的 Day 分頁捲動至可視範圍
+      const activeTab = document.querySelector(`#dayTabsContainer button[data-day="${appState.activeDay}"]`);
+      if (activeTab) {
+        activeTab.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+      }
+    });
+  </script>
+</body>
+</html>

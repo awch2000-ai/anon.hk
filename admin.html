@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>anon.hk | 後台管理系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 sm:p-8 font-sans">
+
+  <div class="max-w-4xl mx-auto space-y-8">
+    <!-- 頂部標題欄 -->
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+      <div>
+        <h1 class="text-2xl font-bold">⚙️ anon.hk 應用程式管理後台</h1>
+        <p class="text-xs text-slate-400">一鍵上傳單頁 HTML 檔案並自動發佈至首頁清單</p>
+      </div>
+      <a href="./index.html" class="text-xs px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700">
+        ← 返回首頁
+      </a>
+    </div>
+
+    <!-- GitHub 連結設定區 -->
+    <details id="settingsBox" class="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+      <summary class="cursor-pointer font-semibold text-sm flex items-center justify-between">
+        <span>🔑 GitHub 儲存庫及 Token 設定（只會儲存在你的瀏覽器內）</span>
+        <span id="configStatus" class="text-xs text-amber-400">尚未設定</span>
+      </summary>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-slate-800">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">GitHub 用戶名稱 (Owner)</label>
+          <input id="ghOwner" type="text" placeholder="例如：your-username" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">儲存庫名稱 (Repository)</label>
+          <input id="ghRepo" type="text" placeholder="例如：anon.hk" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">分支名稱 (Branch)</label>
+          <input id="ghBranch" type="text" value="main" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div class="sm:col-span-3">
+          <label class="block text-xs text-slate-400 mb-1">Fine-Grained Personal Access Token（需開啟 Contents: Read & Write 權限）</label>
+          <input id="ghToken" type="password" placeholder="github_pat_..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div class="sm:col-span-3 flex justify-end">
+          <button onclick="saveConfig()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-semibold">
+            💾 儲存設定至瀏覽器
+          </button>
+        </div>
+      </div>
+    </details>
+
+    <!-- 上傳與發佈表單 -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
+      <h2 class="text-lg font-semibold">🚀 發佈新應用 / 更新現有 HTML 應用</h2>
+
+      <!-- 拖放上傳區 -->
+      <div
+        id="dropZone"
+        class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-6 text-center cursor-pointer transition bg-slate-950/50"
+        onclick="document.getElementById('fileInput').click()"
+      >
+        <input id="fileInput" type="file" accept=".html,.htm" class="hidden" onchange="handleFileSelect(event)" />
+        <p class="text-sm text-slate-300 font-medium" id="dropLabel">📂 點擊此處或拖放單頁 <code class="text-indigo-400">.html</code> 檔案</p>
+        <p class="text-xs text-slate-500 mt-1">亦可以直接在下方文字框貼上 HTML 原始碼</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">應用程式名稱 (Title) *</label>
+          <input id="appTitle" type="text" placeholder="例如：課室抽籤小工具" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm" oninput="autoSlug()" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">網址代稱 Slug（發佈路徑為 <code class="text-indigo-400">/apps/代稱.html</code>）*</label>
+          <input id="appSlug" type="text" placeholder="例如：lucky-draw" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">分類標籤 (Category)</label>
+          <input id="appCategory" type="text" placeholder="例如：教學工具、實用工具、AI、小遊戲" value="實用工具" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">代表圖示 (Emoji Icon)</label>
+          <input id="appIcon" type="text" value="🚀" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs text-slate-400 mb-1">簡短介紹 (Description)</label>
+          <input id="appDesc" type="text" placeholder="簡單介紹這個工具的功能（會顯示在首頁卡片上）..." class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs text-slate-400 mb-1">HTML 完整原始碼 *</label>
+          <textarea id="appHtml" rows="6" placeholder="<!DOCTYPE html><html>...</html>" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-slate-200"></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <span id="statusMsg" class="text-xs text-slate-400"></span>
+        <button id="publishBtn" onclick="publishApp()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/30 transition">
+          ⬆️ 一鍵上傳並加入首頁
+        </button>
+      </div>
+    </div>
+
+    <!-- 已發佈應用管理列表 -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">📦 已發佈的應用程式</h2>
+        <button onclick="fetchCurrentApps()" class="text-xs text-indigo-400 hover:underline">↻ 重新整理</button>
+      </div>
+      <div id="adminAppsList" class="divide-y divide-slate-800 text-sm">
+        <p class="text-slate-500 text-xs py-4">請先在上方完成 GitHub 設定以載入應用清單。</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 支援中文及 Emoji 的 UTF-8 Base64 編碼與解碼函數
+    function toBase64(str) {
+      const bytes = new TextEncoder().encode(str);
+      let binary = '';
+      bytes.forEach(b => binary += String.fromCharCode(b));
+      return btoa(binary);
+    }
+
+    function fromBase64(base64) {
+      const binary = atob(base64.replace(/\n/g, ''));
+      const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+      return new TextDecoder().decode(bytes);
+    }
+
+    function getConfig() {
+      return {
+        owner: localStorage.getItem('gh_owner') || '',
+        repo: localStorage.getItem('gh_repo') || '',
+        branch: localStorage.getItem('gh_branch') || 'main',
+        token: localStorage.getItem('gh_token') || ''
+      };
+    }
+
+    function saveConfig() {
+      localStorage.setItem('gh_owner', document.getElementById('ghOwner').value.trim());
+      localStorage.setItem('gh_repo', document.getElementById('ghRepo').value.trim());
+      localStorage.setItem('gh_branch', document.getElementById('ghBranch').value.trim() || 'main');
+      localStorage.setItem('gh_token', document.getElementById('ghToken').value.trim());
+      updateConfigUI();
+      fetchCurrentApps();
+    }
+
+    function updateConfigUI() {
+      const cfg = getConfig();
+      document.getElementById('ghOwner').value = cfg.owner;
+      document.getElementById('ghRepo').value = cfg.repo;
+      document.getElementById('ghBranch').value = cfg.branch;
+      document.getElementById('ghToken').value = cfg.token;
+
+      const status = document.getElementById('configStatus');
+      if (cfg.owner && cfg.repo && cfg.token) {
+        status.textContent = `已連結：${cfg.owner}/${cfg.repo}`;
+        status.className = 'text-xs text-emerald-400';
+      } else {
+        status.textContent = '尚未設定';
+        status.className = 'text-xs text-amber-400';
+        document.getElementById('settingsBox').open = true;
+      }
+    }
+
+    function autoSlug() {
+      const title = document.getElementById('appTitle').value;
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      if (slug) document.getElementById('appSlug').value = slug;
+    }
+
+    // 拖放檔案及讀取處理
+    const dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('border-indigo-500'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-indigo-500'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('border-indigo-500');
+      if (e.dataTransfer.files.length) readFile(e.dataTransfer.files[0]);
+    });
+
+    function handleFileSelect(e) {
+      if (e.target.files.length) readFile(e.target.files[0]);
+    }
+
+    function readFile(file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const content = e.target.result;
+        document.getElementById('appHtml').value = content;
+        document.getElementById('dropLabel').textContent = `✅ 已載入檔案：${file.name}`;
+
+        // 自動擷取 HTML 內的 <title>
+        const titleMatch = content.match(/<title[^>]*>([^<]+)<\/title>/i);
+        const baseName = file.name.replace(/\.html?$/i, '');
+        if (!document.getElementById('appTitle').value) {
+          document.getElementById('appTitle').value = titleMatch ? titleMatch[1].trim() : baseName;
+        }
+        const cleanSlug = baseName.toLowerCase().replace(/[^a-z0-9-_]+/g, '-').replace(/^-|-$/g, '');
+        document.getElementById('appSlug').value = cleanSlug || `app-${Date.now()}`;
+      };
+      reader.readAsText(file);
+    }
+
+    // GitHub API 請求輔助函數
+    async function ghRequest(path, method = 'GET', body = null) {
+      const { owner, repo, token } = getConfig();
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github+json',
+          'Content-Type': 'application/json'
+        },
+        body: body ? JSON.stringify(body) : null
+      });
+      return res;
+    }
+
+    async function getFileShaAndContent(path) {
+      const { branch } = getConfig();
+      const res = await ghRequest(`${path}?ref=${branch}`);
+      if (res.status === 404) return { sha: null, content: null };
+      if (!res.ok) throw new Error(`GitHub API 錯誤 (${res.status})`);
+      const data = await res.json();
+      return { sha: data.sha, content: fromBase64(data.content) };
+    }
+
+    async function putFile(path, plainTextContent, message) {
+      const { branch } = getConfig();
+      const existing = await getFileShaAndContent(path);
+      const payload = {
+        message,
+        content: toBase64(plainTextContent),
+        branch
+      };
+      if (existing.sha) payload.sha = existing.sha;
+      const res = await ghRequest(path, 'PUT', payload);
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || '上傳失敗');
+      }
+    }
+
+    async function publishApp() {
+      const title = document.getElementById('appTitle').value.trim();
+      const slug = document.getElementById('appSlug').value.trim().replace(/\.html?$/i, '');
+      const category = document.getElementById('appCategory').value.trim() || '一般';
+      const icon = document.getElementById('appIcon').value.trim() || '🚀';
+      const description = document.getElementById('appDesc').value.trim();
+      const html = document.getElementById('appHtml').value;
+
+      if (!title || !slug || !html) {
+        alert('請填寫「應用程式名稱」、「網址代稱 (Slug)」及「HTML 原始碼」。');
+        return;
+      }
+
+      const btn = document.getElementById('publishBtn');
+      const status = document.getElementById('statusMsg');
+      btn.disabled = true;
+      status.textContent = '⏳ 正在將 HTML 檔案上傳至 GitHub...';
+
+      try {
+        const appPath = `apps/${slug}.html`;
+
+        // 1. 上傳單頁 HTML 檔案
+        await putFile(appPath, html, `Publish app: ${title}`);
+
+        // 2. 讀取並更新 apps.json
+        status.textContent = '⏳ 正在更新 apps.json 首頁清單...';
+        const manifestFile = await getFileShaAndContent('apps.json');
+        let apps = [];
+        if (manifestFile.content) {
+          try { apps = JSON.parse(manifestFile.content); } catch (e) { apps = []; }
+        }
+
+        const newEntry = {
+          slug,
+          title,
+          path: appPath,
+          category,
+          icon,
+          description,
+          date: new Date().toISOString().split('T')[0]
+        };
+
+        const idx = apps.findIndex(a => a.slug === slug);
+        if (idx >= 0) apps[idx] = newEntry;
+        else apps.unshift(newEntry);
+
+        await putFile('apps.json', JSON.stringify(apps, null, 2), `Update apps.json for ${title}`);
+
+        status.textContent = `✅ 發佈成功！路徑：/${appPath}（GitHub Pages 約需 30 秒完成部署）`;
+        fetchCurrentApps();
+      } catch (err) {
+        status.textContent = `❌ 發生錯誤：${err.message}`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function deleteApp(slug, appPath) {
+      if (!confirm(`確定要從首頁及 GitHub 儲存庫中刪除「${slug}」嗎？`)) return;
+      const { branch } = getConfig();
+      try {
+        // 1. 從 apps.json 移除
+        const manifestFile = await getFileShaAndContent('apps.json');
+        if (manifestFile.content) {
+          let apps = JSON.parse(manifestFile.content).filter(a => a.slug !== slug);
+          await putFile('apps.json', JSON.stringify(apps, null, 2), `Remove ${slug} from apps.json`);
+        }
+        // 2. 刪除實際 HTML 檔案
+        const target = await getFileShaAndContent(appPath);
+        if (target.sha) {
+          await ghRequest(appPath, 'DELETE', {
+            message: `Delete ${appPath}`,
+            sha: target.sha,
+            branch
+          });
+        }
+        fetchCurrentApps();
+      } catch (err) {
+        alert('刪除失敗：' + err.message);
+      }
+    }
+
+    async function fetchCurrentApps() {
+      const cfg = getConfig();
+      if (!cfg.owner || !cfg.repo || !cfg.token) return;
+      const container = document.getElementById('adminAppsList');
+      try {
+        const manifestFile = await getFileShaAndContent('apps.json');
+        const apps = manifestFile.content ? JSON.parse(manifestFile.content) : [];
+        if (apps.length === 0) {
+          container.innerHTML = `<p class="text-slate-500 text-xs py-4">目前 apps.json 內未有任何應用程式。</p>`;
+          return;
+        }
+        container.innerHTML = apps.map(app => `
+          <div class="py-3 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">${app.icon || '🚀'}</span>
+              <div>
+                <a href="./${app.path}" target="_blank" class="font-medium text-slate-200 hover:text-indigo-400">
+                  ${app.title}
+                </a>
+                <p class="text-xs text-slate-500">/${app.path} • ${app.category || '一般'}</p>
+              </div>
+            </div>
+            <button
+              onclick="deleteApp('${app.slug}', '${app.path}')"
+              class="text-xs px-2.5 py-1 rounded bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800/50"
+            >
+              刪除
+            </button>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<p class="text-rose-400 text-xs py-4">無法讀取 apps.json：${err.message}</p>`;
+      }
+    }
+
+    updateConfigUI();
+    fetchCurrentApps();
+  </script>
+</body>
+</html>

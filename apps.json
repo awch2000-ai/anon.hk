@@ -1,5 +1,14 @@
 [
   {
+    "slug": "goal",
+    "title": "AI 個人目標管理儀表板 | GoalFlow",
+    "path": "apps/goal.html",
+    "category": "實用工具",
+    "icon": "🎯",
+    "description": "一個結合 Gemini AI 自動拆解目標功能 的「個人目標管理儀表板」。你可以直接輸入任何宏大的目標（例如：「三個月內減脂 5 公斤」或「學會基礎日文對話」），點擊按鈕後，系統便會透過 Gemini API 自動為你生成 3 到 5 個具體、可執行的關鍵小目標（Key Results），並即時更新視覺化圖表與每日習慣進度。",
+    "date": "2026-11-15"
+  },
+  {
     "slug": "gym",
     "title": "健身追蹤器",
     "path": "apps/gym.html",

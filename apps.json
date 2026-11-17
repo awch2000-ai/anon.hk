@@ -1,5 +1,14 @@
 [
   {
+    "slug": "NutriSnap",
+    "title": "營記 NutriSnap — AI 飲食營養追蹤",
+    "path": "apps/NutriSnap.html",
+    "category": "實用工具",
+    "icon": "🍕",
+    "description": "整合了Gemini視覺和文字分析功能，可以透過照片或文字描述自動估算卡路里、蛋白質、碳水化合物和脂肪，還會自動按日期時間整理每日記錄和每週趨勢圖表。",
+    "date": "2026-11-17"
+  },
+  {
     "slug": "goal",
     "title": "AI 個人目標管理儀表板 | GoalFlow",
     "path": "apps/goal.html",

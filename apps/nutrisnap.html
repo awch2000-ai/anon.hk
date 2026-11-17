@@ -178,7 +178,7 @@
                         </div>
                         <button onclick="openApiConfigModal()" id="modelBadgeBtn" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-500 hover:text-emerald-700 font-medium transition flex items-center gap-1">
                             <i data-lucide="cpu" class="w-3 h-3"></i>
-                            <span id="currentModelLabel">gemini-2.5-flash</span>
+                            <span id="currentModelLabel">gemini-4-hydrogen</span>
                         </button>
                     </div>
 
@@ -626,12 +626,34 @@
 
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">選擇 Gemini 模型 (Model)</label>
-                    <select id="inputApiModel" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                        <option value="gemini-2.5-flash">gemini-2.5-flash (預設推薦 — 速度快、支援相片分析)</option>
-                        <option value="gemini-2.5-pro">gemini-2.5-pro (高精準度推理與複雜餐點拆解)</option>
-                        <option value="gemini-2.0-flash">gemini-2.0-flash (穩定快速版本)</option>
-                        <option value="gemini-3-flash-preview">gemini-3-flash-preview (新一代預覽版)</option>
+                    <select id="inputApiModel" onchange="handleModelSelectChange()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <optgroup label="🚀 Gemini 4 Series (Latest Frontier)">
+                            <option value="gemini-4-hydrogen">gemini-4-hydrogen — Gemini 4 Hydrogen (預設 / 最新極速日常與多模態模型)</option>
+                            <option value="gemini-4-carbon">gemini-4-carbon — Gemini 4 Carbon (高階深度推理與複雜分析)</option>
+                            <option value="gemini-4-argon">gemini-4-argon — Gemini 4 Argon (Frontier 旗艦模型)</option>
+                        </optgroup>
+                        <optgroup label="⚡ Gemini 3.8 & 3.x Series">
+                            <option value="gemini-3.8-flash">gemini-3.8-flash — Gemini 3.8 Flash (高效穩定多模態模型)</option>
+                            <option value="gemini-3.6-flash">gemini-3.6-flash — Gemini 3.6 Flash</option>
+                            <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite — Gemini 3.5 Flash-Lite (超低延遲輕量版)</option>
+                            <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview — Gemini 3.1 Pro Preview</option>
+                            <option value="gemini-3-flash-preview">gemini-3-flash-preview — Gemini 3 Flash Preview</option>
+                        </optgroup>
+                        <optgroup label="📦 Gemini 2.5 Series (Legacy)">
+                            <option value="gemini-2.5-flash">gemini-2.5-flash — Gemini 2.5 Flash</option>
+                            <option value="gemini-2.5-pro">gemini-2.5-pro — Gemini 2.5 Pro</option>
+                        </optgroup>
+                        <optgroup label="🛠️ 進階自訂">
+                            <option value="custom">自訂模型 ID (Custom Endpoint)...</option>
+                        </optgroup>
                     </select>
+                </div>
+
+                <!-- Custom Model ID Input (Revealed when 'custom' is selected) -->
+                <div id="customModelContainer" class="hidden pt-1">
+                    <label class="block font-semibold text-slate-700 mb-1">輸入自訂模型 ID (Custom Model String)</label>
+                    <input type="text" id="inputCustomModel" placeholder="例如：gemini-4-hydrogen-exp 或 gemini-3.8-pro" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white">
+                    <p class="text-[11px] text-slate-400 mt-1">支援直接輸入 Google AI Studio 推出嘅任何最新模型代號。</p>
                 </div>
 
                 <!-- Test Connection Feedback Box -->
@@ -732,9 +754,22 @@
         // Default environment fallback variable
         const apiKey = "";
 
+        const PRESET_MODELS = [
+            'gemini-4-hydrogen',
+            'gemini-4-carbon',
+            'gemini-4-argon',
+            'gemini-3.8-flash',
+            'gemini-3.6-flash',
+            'gemini-3.5-flash-lite',
+            'gemini-3.1-pro-preview',
+            'gemini-3-flash-preview',
+            'gemini-2.5-flash',
+            'gemini-2.5-pro'
+        ];
+
         let apiConfig = {
             apiKey: '',
-            model: 'gemini-2.5-flash'
+            model: 'gemini-4-hydrogen'
         };
 
         let mealsData = [];
@@ -836,7 +871,7 @@
                 if (savedApi) {
                     const parsedApi = JSON.parse(savedApi);
                     apiConfig.apiKey = (parsedApi.apiKey || '').trim();
-                    apiConfig.model = parsedApi.model || 'gemini-2.5-flash';
+                    apiConfig.model = (parsedApi.model || 'gemini-4-hydrogen').trim();
                 }
             } catch (e) {
                 console.error('Failed to read localStorage', e);
@@ -869,7 +904,7 @@
             const modelLabel = document.getElementById('currentModelLabel');
 
             if (modelLabel) {
-                modelLabel.textContent = apiConfig.model || 'gemini-2.5-flash';
+                modelLabel.textContent = apiConfig.model || 'gemini-4-hydrogen';
             }
 
             const hasCustomKey = Boolean(apiConfig.apiKey && apiConfig.apiKey.trim().length > 5);
@@ -882,9 +917,41 @@
             }
         }
 
+        function handleModelSelectChange() {
+            const selectEl = document.getElementById('inputApiModel');
+            const customContainer = document.getElementById('customModelContainer');
+            if (selectEl.value === 'custom') {
+                customContainer.classList.remove('hidden');
+                document.getElementById('inputCustomModel').focus();
+            } else {
+                customContainer.classList.add('hidden');
+            }
+        }
+
+        function getSelectedModelFromModal() {
+            const selectVal = document.getElementById('inputApiModel').value;
+            if (selectVal === 'custom') {
+                const customVal = document.getElementById('inputCustomModel').value.trim();
+                return customVal || 'gemini-4-hydrogen';
+            }
+            return selectVal || 'gemini-4-hydrogen';
+        }
+
         function openApiConfigModal(reasonMessage = '') {
             document.getElementById('inputApiKey').value = apiConfig.apiKey || '';
-            document.getElementById('inputApiModel').value = apiConfig.model || 'gemini-2.5-flash';
+            const currentModel = apiConfig.model || 'gemini-4-hydrogen';
+            const selectEl = document.getElementById('inputApiModel');
+            const customInput = document.getElementById('inputCustomModel');
+
+            if (PRESET_MODELS.includes(currentModel)) {
+                selectEl.value = currentModel;
+                customInput.value = '';
+            } else {
+                selectEl.value = 'custom';
+                customInput.value = currentModel;
+            }
+            handleModelSelectChange();
+
             document.getElementById('apiTestResultBox').classList.add('hidden');
 
             const reasonBox = document.getElementById('apiModalReasonBox');
@@ -919,7 +986,13 @@
 
         function saveApiConfig() {
             const keyVal = document.getElementById('inputApiKey').value.trim();
-            const modelVal = document.getElementById('inputApiModel').value || 'gemini-2.5-flash';
+            const selectVal = document.getElementById('inputApiModel').value;
+            if (selectVal === 'custom' && !document.getElementById('inputCustomModel').value.trim()) {
+                showToast('請輸入自訂模型 ID！', 'error');
+                return;
+            }
+
+            const modelVal = getSelectedModelFromModal();
 
             apiConfig.apiKey = keyVal;
             apiConfig.model = modelVal;
@@ -951,7 +1024,7 @@
 
         async function testGeminiConnection() {
             const keyVal = document.getElementById('inputApiKey').value.trim() || apiKey;
-            const modelVal = document.getElementById('inputApiModel').value || 'gemini-2.5-flash';
+            const modelVal = getSelectedModelFromModal();
             const testBox = document.getElementById('apiTestResultBox');
             const testBtn = document.getElementById('testApiBtn');
 
@@ -969,7 +1042,7 @@
             testBox.classList.remove('hidden');
 
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelVal}:generateContent?key=${encodeURIComponent(keyVal)}`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelVal)}:generateContent?key=${encodeURIComponent(keyVal)}`;
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1155,7 +1228,7 @@
             }
 
             const effectiveApiKey = (apiConfig.apiKey && apiConfig.apiKey.trim()) ? apiConfig.apiKey.trim() : apiKey;
-            const selectedModel = apiConfig.model || 'gemini-2.5-flash';
+            const selectedModel = apiConfig.model || 'gemini-4-hydrogen';
 
             const analyzeBtn = document.getElementById('analyzeBtn');
             const loadingBox = document.getElementById('aiLoadingBox');
@@ -1168,7 +1241,7 @@
             loadingBox.classList.remove('hidden');
             resultForm.classList.add('opacity-40', 'pointer-events-none');
 
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${encodeURIComponent(effectiveApiKey)}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(selectedModel)}:generateContent?key=${encodeURIComponent(effectiveApiKey)}`;
 
             const systemPrompt = `你係一位專業嘅香港註冊營養師，熟悉香港茶餐廳、酒樓點心、兩餸飯、街頭小食以及各國料理嘅卡路里同三大營養素（蛋白質、碳水化合物、脂肪）。
 請根據用家提供嘅食物相片及/或文字描述，準確估算呢一餐嘅總卡路里(kcal)、蛋白質(g)、碳水化合物(g)同埋脂肪(g)，並拆解入面嘅主要食材項目。

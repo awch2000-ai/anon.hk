@@ -1,5 +1,14 @@
 [
   {
+    "slug": "7dayworkout",
+    "title": "7天健身訓練追蹤器｜7-Day Workout Tracker",
+    "path": "apps/7dayworkout.html",
+    "category": "實用工具",
+    "icon": "🏋️‍♂️",
+    "description": "",
+    "date": "2026-11-20"
+  },
+  {
     "slug": "nutrisnap",
     "title": "營記 NutriSnap — AI 飲食營養追蹤",
     "path": "apps/nutrisnap.html",

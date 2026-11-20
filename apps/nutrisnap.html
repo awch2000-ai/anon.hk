@@ -30,7 +30,7 @@
                     }
                 }
             }
-        }
+        };
     </script>
     <style>
         body {
@@ -55,70 +55,72 @@
             transform: rotate(-90deg);
             transform-origin: 50% 50%;
         }
-        @keyframes pulse-border {
-            0%, 100% { border-color: rgba(16, 185, 129, 0.4); }
-            50% { border-color: rgba(16, 185, 129, 1); }
+        /* Clean collapsible details marker across Chrome/Safari/Android */
+        summary::-webkit-details-marker {
+            display: none;
         }
-        .analyzing-pulse {
-            animation: pulse-border 1.5s infinite;
+        summary::marker {
+            display: none;
+            content: '';
         }
     </style>
 </head>
-<body class="min-h-screen pb-24 md:pb-10">
+<body class="min-h-screen pb-24 md:pb-10 font-sans">
 
     <!-- Top Navigation Bar -->
     <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center space-x-2.5">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+            <!-- Brand Identity -->
+            <div class="flex items-center space-x-2.5 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 shrink-0">
                     <i data-lucide="utensils-crossed" class="w-5 h-5"></i>
                 </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-tight text-slate-900 flex items-center gap-1.5">
+                <div class="min-w-0">
+                    <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-900 truncate">
                         營記 NutriSnap
                     </h1>
-                    <p class="text-xs text-slate-500 hidden sm:block">一鍵影相或輸入文字，Gemini 即時估算卡路里與三大營養素</p>
+                    <p class="text-xs text-slate-500 hidden sm:block truncate">一鍵影相或輸入文字，Gemini 即時估算卡路里與三大營養素</p>
                 </div>
             </div>
 
             <!-- Action Buttons (API Config, Target Setting, Backup) -->
-            <div class="flex items-center space-x-1.5 sm:space-x-2">
+            <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
                 <!-- API Config Button -->
-                <button onclick="openApiConfigModal()" id="apiNavBtn" class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition border border-transparent" title="設定 Gemini API Key 及模型">
-                    <span id="apiStatusDot" class="w-2 h-2 rounded-full bg-amber-500"></span>
+                <button type="button" onclick="openApiConfigModal()" id="apiNavBtn" class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition border border-transparent" title="設定 Gemini API Key 及模型">
+                    <span id="apiStatusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                     <i data-lucide="key-round" class="w-3.5 h-3.5 text-slate-600"></i>
                     <span>API 設定</span>
                 </button>
 
                 <!-- Daily Goals Button -->
-                <button onclick="openGoalsModal()" class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition">
+                <button type="button" onclick="openGoalsModal()" class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition">
                     <i data-lucide="target" class="w-4 h-4 text-emerald-600"></i>
-                    <span class="hidden xs:inline sm:inline">每日目標</span>
+                    <span class="hidden sm:inline">每日目標</span>
                 </button>
 
                 <!-- Data Management Dropdown -->
-                <div class="relative group">
-                    <button onclick="toggleDataMenu()" id="dataMenuBtn" class="flex items-center space-x-1 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition">
+                <div class="relative">
+                    <button type="button" onclick="toggleDataMenu()" id="dataMenuBtn" class="flex items-center space-x-1 px-2.5 sm:px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition">
                         <i data-lucide="database" class="w-4 h-4 text-slate-600"></i>
                         <span class="hidden sm:inline">數據管理</span>
                     </button>
                     <!-- Dropdown -->
-                    <div id="dataDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50 text-xs">
-                        <button onclick="loadSampleData()" class="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center space-x-2 text-slate-700">
+                    <div id="dataDropdown" class="hidden absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50 text-xs">
+                        <button type="button" onclick="loadSampleData(false)" class="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center space-x-2 text-slate-700">
                             <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
                             <span>載入香港飲食示範數據</span>
                         </button>
-                        <button onclick="exportData()" class="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center space-x-2 text-slate-700">
+                        <button type="button" onclick="exportData()" class="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center space-x-2 text-slate-700">
                             <i data-lucide="download" class="w-4 h-4 text-blue-500"></i>
                             <span>匯出備份 (JSON)</span>
                         </button>
-                        <label class="w-full px-4 py-2 text-left hover:bg-slate-50 flex items-center space-x-2 text-slate-700 cursor-pointer">
+                        <label class="w-full px-4 py-2.5 text-left hover:bg-slate-50 flex items-center space-x-2 text-slate-700 cursor-pointer">
                             <i data-lucide="upload" class="w-4 h-4 text-emerald-500"></i>
                             <span>匯入備份 (JSON)</span>
                             <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
                         </label>
                         <hr class="my-1 border-slate-100">
-                        <button onclick="openClearConfirmModal()" class="w-full px-4 py-2 text-left hover:bg-red-50 flex items-center space-x-2 text-red-600">
+                        <button type="button" onclick="openClearConfirmModal()" class="w-full px-4 py-2.5 text-left hover:bg-red-50 flex items-center space-x-2 text-red-600">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                             <span>清空所有記錄</span>
                         </button>
@@ -131,34 +133,34 @@
     <!-- Main Container -->
     <main class="max-w-5xl mx-auto px-4 pt-4">
 
-        <!-- Date Navigator Bar (Shared across Daily & Weekly views) -->
+        <!-- Shared Date Navigator Bar -->
         <div class="bg-white rounded-2xl p-3 shadow-sm border border-slate-200/80 mb-5 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center space-x-1.5">
-                <button onclick="changeSelectedDate(-1)" class="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition" title="前一日">
+                <button type="button" onclick="changeSelectedDate(-1)" class="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition" title="前一日">
                     <i data-lucide="chevron-left" class="w-5 h-5"></i>
                 </button>
                 <div class="relative flex items-center">
                     <input type="date" id="globalDatePicker" onchange="onGlobalDateChange(this.value)" class="pl-3 pr-2 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer">
                 </div>
-                <button onclick="changeSelectedDate(1)" class="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition" title="後一日">
+                <button type="button" onclick="changeSelectedDate(1)" class="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition" title="後一日">
                     <i data-lucide="chevron-right" class="w-5 h-5"></i>
                 </button>
-                <button onclick="goToToday()" id="todayBadgeBtn" class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">
+                <button type="button" onclick="goToToday()" id="todayBadgeBtn" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition">
                     今日
                 </button>
             </div>
 
             <!-- Desktop Navigation Tabs -->
             <div class="hidden md:flex bg-slate-100 p-1 rounded-xl space-x-1">
-                <button onclick="switchTab('record')" id="tabBtn-record-desktop" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
+                <button type="button" onclick="switchTab('record')" id="tabBtn-record-desktop" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
                     <i data-lucide="camera" class="w-4 h-4"></i>
                     <span>📸 記錄飲食</span>
                 </button>
-                <button onclick="switchTab('daily')" id="tabBtn-daily-desktop" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
+                <button type="button" onclick="switchTab('daily')" id="tabBtn-daily-desktop" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
                     <i data-lucide="pie-chart" class="w-4 h-4"></i>
                     <span>📅 每日統計</span>
                 </button>
-                <button onclick="switchTab('weekly')" id="tabBtn-weekly-desktop" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
+                <button type="button" onclick="switchTab('weekly')" id="tabBtn-weekly-desktop" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
                     <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
                     <span>📊 每週趨勢</span>
                 </button>
@@ -168,17 +170,17 @@
         <!-- TAB 1: AI Food Analyzer & Quick Log (📸 記錄飲食) -->
         <section id="tab-record" class="space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                <!-- Left Column: Input Form (Image + Text + Time) -->
+
+                <!-- Left Column: Input Form (Multi-Photo + Text + Time) -->
                 <div class="lg:col-span-6 bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-5">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 gap-2">
                         <div class="flex items-center space-x-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                             <h2 class="font-bold text-slate-800 text-base">AI 智能飲食分析</h2>
                         </div>
-                        <button onclick="openApiConfigModal()" id="modelBadgeBtn" class="text-[11px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-emerald-50 text-slate-500 hover:text-emerald-700 font-medium transition flex items-center gap-1">
-                            <i data-lucide="cpu" class="w-3 h-3"></i>
-                            <span id="currentModelLabel">gemini-4-hydrogen</span>
+                        <button type="button" onclick="openApiConfigModal()" id="modelBadgeBtn" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 font-medium transition flex items-center gap-1 max-w-[180px]" title="點擊切換 Gemini 模型">
+                            <i data-lucide="cpu" class="w-3 h-3 shrink-0"></i>
+                            <span id="currentModelLabel" class="truncate">gemini-4-hydrogen</span>
                         </button>
                     </div>
 
@@ -204,28 +206,40 @@
                         </div>
                     </div>
 
-                    <!-- Image Upload Box -->
+                    <!-- Multi-Photo Upload Section (Android Camera + Multi-Select Gallery) -->
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1.5">1. 影張相或者上傳食物相片（選填）</label>
-                        <div id="imageDropZone" onclick="document.getElementById('foodImageInput').click()" class="relative border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-4 text-center cursor-pointer transition bg-slate-50/60 hover:bg-emerald-50/30 min-h-[160px] flex flex-col items-center justify-center overflow-hidden">
-                            <input type="file" id="foodImageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
-                            
-                            <!-- Default Empty Prompt -->
-                            <div id="uploadPlaceholder" class="space-y-2 py-3">
-                                <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-                                    <i data-lucide="camera" class="w-6 h-6"></i>
-                                </div>
-                                <div class="text-sm font-semibold text-slate-700">撳呢度影相 / 揀選食物相片</div>
-                                <p class="text-xs text-slate-400">AI 會自動辨識食物種類同估算份量</p>
+                        <div class="flex items-center justify-between mb-1.5 gap-2">
+                            <label class="block text-xs font-medium text-slate-600">1. 影相或上傳食物相片（選填，最多 5 張）</label>
+                            <div id="photoCountActions" class="hidden flex items-center space-x-2 shrink-0">
+                                <span id="photoCounterBadge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">已加入 0 / 5 張</span>
+                                <button type="button" onclick="clearAllImages()" class="text-[11px] text-red-500 hover:text-red-700 font-semibold transition">清除全部</button>
                             </div>
+                        </div>
 
-                            <!-- Image Preview Container -->
-                            <div id="imagePreviewContainer" class="hidden w-full relative">
-                                <img id="imagePreviewEl" src="" alt="Food Preview" class="max-h-56 mx-auto rounded-xl object-cover shadow-sm">
-                                <button type="button" onclick="clearImage(event)" class="absolute top-2 right-2 bg-slate-900/75 hover:bg-red-600 text-white p-1.5 rounded-full shadow transition" title="移除相片">
-                                    <i data-lucide="x" class="w-4 h-4"></i>
+                        <div id="imageDropZone" class="relative border-2 border-dashed border-slate-300 rounded-2xl p-4 text-center transition bg-slate-50/60 space-y-3">
+                            <!-- Hidden Native File Inputs -->
+                            <input type="file" id="cameraImageInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(event)">
+                            <input type="file" id="galleryImageInput" accept="image/*" multiple class="hidden" onchange="handleImageUpload(event)">
+
+                            <!-- Side-by-side Camera & Gallery Buttons -->
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <button type="button" onclick="triggerCameraUpload()" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm flex items-center justify-center space-x-1.5 transition active:scale-[0.98]">
+                                    <i data-lucide="camera" class="w-4 h-4 shrink-0"></i>
+                                    <span>📸 即時影相</span>
+                                </button>
+                                <button type="button" onclick="triggerGalleryUpload()" class="py-2.5 px-3 rounded-xl bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-emerald-300 text-xs font-bold shadow-sm flex items-center justify-center space-x-1.5 transition active:scale-[0.98]">
+                                    <i data-lucide="images" class="w-4 h-4 shrink-0 text-emerald-600"></i>
+                                    <span>🖼️ 相簿揀相 (可多選)</span>
                                 </button>
                             </div>
+
+                            <!-- Empty Hint -->
+                            <div id="uploadEmptyHint" class="py-1.5">
+                                <p class="text-xs text-slate-400">可連續影多張相或由相簿一次過揀多張，AI 會綜合分析整餐熱量</p>
+                            </div>
+
+                            <!-- Responsive Thumbnail Grid -->
+                            <div id="uploadedImagesGrid" class="hidden grid grid-cols-3 sm:grid-cols-5 gap-2 pt-1"></div>
                         </div>
                     </div>
 
@@ -236,7 +250,7 @@
                             <span class="text-[11px] text-emerald-600 font-medium">淨係打字都得！</span>
                         </div>
                         <textarea id="foodTextInput" rows="3" placeholder="例如：茶餐廳叉雞飯少飯走汁 + 凍檸茶少甜、或者「兩隻烚蛋加一杯無糖豆漿」..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"></textarea>
-                        
+
                         <!-- Quick Cantonese Presets -->
                         <div class="mt-2 flex flex-wrap gap-1.5">
                             <span class="text-[11px] text-slate-400 self-center mr-1">常見快選：</span>
@@ -248,9 +262,9 @@
                     </div>
 
                     <!-- Analyze Action Button -->
-                    <button id="analyzeBtn" onclick="analyzeFoodWithGemini()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm shadow-md shadow-emerald-500/20 flex items-center justify-center space-x-2 transition transform active:scale-[0.99]">
+                    <button type="button" id="analyzeBtn" onclick="analyzeFoodWithGemini()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm shadow-md shadow-emerald-500/20 flex items-center justify-center space-x-2 transition transform active:scale-[0.99]">
                         <i data-lucide="sparkles" class="w-5 h-5"></i>
-                        <span>用 Gemini AI 估算卡路里 & 營養素</span>
+                        <span>用 Gemini AI 估算卡路里 &amp; 營養素</span>
                     </button>
                 </div>
 
@@ -262,28 +276,28 @@
                                 <i data-lucide="clipboard-check" class="w-5 h-5 text-emerald-600"></i>
                                 <h2 class="font-bold text-slate-800 text-base">估算結果與微調儲存</h2>
                             </div>
-                            <button onclick="resetAnalysisForm()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center space-x-1">
+                            <button type="button" onclick="resetAnalysisForm()" class="text-xs text-slate-400 hover:text-slate-600 flex items-center space-x-1">
                                 <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
                                 <span>重設</span>
                             </button>
                         </div>
 
-                        <!-- API Error Banner (if occurred) -->
+                        <!-- API Error Banner -->
                         <div id="apiErrorBanner" class="hidden mb-4 p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-800 space-y-2">
                             <div class="flex items-start justify-between gap-2">
                                 <div class="flex items-start gap-2">
                                     <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
                                     <div>
                                         <span class="font-bold">AI 分析發生錯誤：</span>
-                                        <p id="apiErrorText" class="mt-0.5 text-red-700 leading-relaxed"></p>
+                                        <p id="apiErrorText" class="mt-0.5 text-red-700 leading-relaxed break-words"></p>
                                     </div>
                                 </div>
-                                <button onclick="document.getElementById('apiErrorBanner').classList.add('hidden')" class="text-red-400 hover:text-red-600">
+                                <button type="button" onclick="hideEl('apiErrorBanner')" class="text-red-400 hover:text-red-600 shrink-0">
                                     <i data-lucide="x" class="w-4 h-4"></i>
                                 </button>
                             </div>
                             <div class="flex justify-end">
-                                <button onclick="openApiConfigModal()" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs flex items-center gap-1 transition">
+                                <button type="button" onclick="openApiConfigModal()" class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs flex items-center gap-1 transition">
                                     <i data-lucide="key-round" class="w-3.5 h-3.5"></i>
                                     <span>打開 API 設定輸入 Key</span>
                                 </button>
@@ -346,7 +360,7 @@
 
                     <!-- Save to Daily Log Button -->
                     <div class="pt-4 mt-4 border-t border-slate-100">
-                        <button onclick="saveMealRecord()" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-sm flex items-center justify-center space-x-2 transition">
+                        <button type="button" onclick="saveMealRecord()" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-sm flex items-center justify-center space-x-2 transition">
                             <i data-lucide="plus-circle" class="w-5 h-5 text-emerald-400"></i>
                             <span>儲存到飲食日記</span>
                         </button>
@@ -354,14 +368,14 @@
                 </div>
             </div>
 
-            <!-- Today's Quick Preview List at bottom of Record Tab -->
+            <!-- Selected Date Quick Preview List -->
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80">
                 <div class="flex items-center justify-between mb-3">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
                         <i data-lucide="clock" class="w-4 h-4 text-emerald-600"></i>
                         <span>所選日期 (<span id="quickPreviewDateLabel">今日</span>) 已記錄餐點</span>
                     </h3>
-                    <button onclick="switchTab('daily')" class="text-xs text-emerald-600 hover:text-emerald-700 font-semibold flex items-center gap-1">
+                    <button type="button" onclick="switchTab('daily')" class="text-xs text-emerald-600 hover:text-emerald-700 font-semibold flex items-center gap-1">
                         <span>睇完整統計</span>
                         <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                     </button>
@@ -381,9 +395,9 @@
                         </h2>
                         <p class="text-xs text-slate-400">根據你設定嘅每日目標計算進度</p>
                     </div>
-                    <button onclick="openGoalsModal()" class="text-xs text-emerald-600 hover:underline font-medium flex items-center gap-1">
+                    <button type="button" onclick="openGoalsModal()" class="text-xs text-emerald-600 hover:underline font-medium flex items-center gap-1">
                         <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
-                        調整目標
+                        <span>調整目標</span>
                     </button>
                 </div>
 
@@ -419,7 +433,7 @@
                                     蛋白質 (Protein)
                                 </span>
                                 <span class="text-slate-600 font-medium">
-                                    <strong id="dailyProteinVal" class="text-slate-900">0</strong> / <span id="goalProteinVal">120</span> g
+                                    <strong id="dailyProteinVal" class="text-slate-900">0</strong> / <span id="goalProteinVal">125</span> g
                                     <span id="dailyProteinPct" class="text-[11px] text-slate-400 ml-1">(0%)</span>
                                 </span>
                             </div>
@@ -436,7 +450,7 @@
                                     碳水化合物 (Carbs)
                                 </span>
                                 <span class="text-slate-600 font-medium">
-                                    <strong id="dailyCarbsVal" class="text-slate-900">0</strong> / <span id="goalCarbsVal">220</span> g
+                                    <strong id="dailyCarbsVal" class="text-slate-900">0</strong> / <span id="goalCarbsVal">225</span> g
                                     <span id="dailyCarbsPct" class="text-[11px] text-slate-400 ml-1">(0%)</span>
                                 </span>
                             </div>
@@ -472,7 +486,7 @@
                         <i data-lucide="list-ordered" class="w-5 h-5 text-emerald-600"></i>
                         <span>當日飲食時間軸</span>
                     </h3>
-                    <button onclick="switchTab('record')" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1 transition">
+                    <button type="button" onclick="switchTab('record')" class="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1 transition">
                         <i data-lucide="plus" class="w-4 h-4"></i>
                         <span>新增記錄</span>
                     </button>
@@ -573,15 +587,15 @@
 
     <!-- Mobile Bottom Tab Navigation -->
     <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 z-40 flex justify-around py-2 px-2 shadow-lg">
-        <button onclick="switchTab('record')" id="tabBtn-record-mobile" class="flex flex-col items-center py-1 px-4 rounded-xl text-xs font-semibold transition">
+        <button type="button" onclick="switchTab('record')" id="tabBtn-record-mobile" class="flex flex-col items-center py-1 px-4 rounded-xl text-xs font-semibold transition">
             <i data-lucide="camera" class="w-5 h-5 mb-0.5"></i>
             <span>記錄飲食</span>
         </button>
-        <button onclick="switchTab('daily')" id="tabBtn-daily-mobile" class="flex flex-col items-center py-1 px-4 rounded-xl text-xs font-semibold transition">
+        <button type="button" onclick="switchTab('daily')" id="tabBtn-daily-mobile" class="flex flex-col items-center py-1 px-4 rounded-xl text-xs font-semibold transition">
             <i data-lucide="pie-chart" class="w-5 h-5 mb-0.5"></i>
             <span>每日統計</span>
         </button>
-        <button onclick="switchTab('weekly')" id="tabBtn-weekly-mobile" class="flex flex-col items-center py-1 px-4 rounded-xl text-xs font-semibold transition">
+        <button type="button" onclick="switchTab('weekly')" id="tabBtn-weekly-mobile" class="flex flex-col items-center py-1 px-4 rounded-xl text-xs font-semibold transition">
             <i data-lucide="bar-chart-3" class="w-5 h-5 mb-0.5"></i>
             <span>每週趨勢</span>
         </button>
@@ -589,13 +603,13 @@
 
     <!-- MODAL 0: Gemini API Configuration Modal -->
     <div id="apiConfigModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 space-y-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100 space-y-4 max-h-[92vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
                     <i data-lucide="key-round" class="w-5 h-5 text-emerald-600"></i>
                     <span>Gemini API 設定</span>
                 </h3>
-                <button onclick="closeApiConfigModal()" class="text-slate-400 hover:text-slate-600">
+                <button type="button" onclick="closeApiConfigModal()" class="text-slate-400 hover:text-slate-600 p-1">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -607,6 +621,7 @@
             </div>
 
             <div class="space-y-3.5 text-xs">
+                <!-- API Key Field -->
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label class="font-semibold text-slate-700">Gemini API Key</label>
@@ -621,32 +636,43 @@
                             <i id="apiKeyEyeIcon" data-lucide="eye" class="w-4 h-4"></i>
                         </button>
                     </div>
-                    <p class="text-[11px] text-slate-400 mt-1">API Key 只會安全儲存喺你部機嘅瀏覽器 (`localStorage`)，唔會傳送到第三方伺服器。</p>
+                    <p class="text-[11px] text-slate-400 mt-1">API Key 只會安全儲存喺你部機嘅瀏覽器，唔會傳送到第三方伺服器。</p>
                 </div>
 
+                <!-- Model Selector + Auto-Fetch Button -->
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">選擇 Gemini 模型 (Model)</label>
+                    <div class="flex items-center justify-between mb-1 gap-2">
+                        <label class="font-semibold text-slate-700">選擇 Gemini 模型 (Model)</label>
+                        <button type="button" id="fetchModelsBtn" onclick="fetchAvailableModels(false)" class="text-[11px] px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold flex items-center gap-1 transition shrink-0">
+                            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                            <span>🔄 自動讀取可用模型</span>
+                        </button>
+                    </div>
                     <select id="inputApiModel" onchange="handleModelSelectChange()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <optgroup id="liveModelsOptGroup" label="🌐 帳號實時可用模型 (Live)" class="hidden"></optgroup>
                         <optgroup label="🚀 Gemini 4 Series (Latest Frontier)">
-                            <option value="gemini-4-hydrogen">gemini-4-hydrogen — Gemini 4 Hydrogen (預設 / 最新極速日常與多模態模型)</option>
-                            <option value="gemini-4-carbon">gemini-4-carbon — Gemini 4 Carbon (高階深度推理與複雜分析)</option>
-                            <option value="gemini-4-argon">gemini-4-argon — Gemini 4 Argon (Frontier 旗艦模型)</option>
+                            <option value="gemini-4-hydrogen">gemini-4-hydrogen [⚡ 快速 ~2-5s] — Gemini 4 Hydrogen</option>
+                            <option value="gemini-4-carbon">gemini-4-carbon [🧠 深度 ~6-15s] — Gemini 4 Carbon</option>
+                            <option value="gemini-4-argon">gemini-4-argon [🧠 深度 ~6-15s] — Gemini 4 Argon</option>
                         </optgroup>
-                        <optgroup label="⚡ Gemini 3.8 & 3.x Series">
-                            <option value="gemini-3.8-flash">gemini-3.8-flash — Gemini 3.8 Flash (高效穩定多模態模型)</option>
-                            <option value="gemini-3.6-flash">gemini-3.6-flash — Gemini 3.6 Flash</option>
-                            <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite — Gemini 3.5 Flash-Lite (超低延遲輕量版)</option>
-                            <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview — Gemini 3.1 Pro Preview</option>
-                            <option value="gemini-3-flash-preview">gemini-3-flash-preview — Gemini 3 Flash Preview</option>
+                        <optgroup label="⚡ Gemini 3.8 &amp; 3.x Series">
+                            <option value="gemini-3.8-flash">gemini-3.8-flash [⚡ 快速 ~2-5s] — Gemini 3.8 Flash</option>
+                            <option value="gemini-3.6-flash">gemini-3.6-flash [⚡ 快速 ~2-5s] — Gemini 3.6 Flash</option>
+                            <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite [⚡ 極速 ~1-3s] — Gemini 3.5 Flash-Lite</option>
+                            <option value="gemini-3.1-pro-preview">gemini-3.1-pro-preview [🧠 深度 ~6-15s] — Gemini 3.1 Pro Preview</option>
+                            <option value="gemini-3-flash-preview">gemini-3-flash-preview [⚡ 快速 ~2-5s] — Gemini 3 Flash Preview</option>
                         </optgroup>
-                        <optgroup label="📦 Gemini 2.5 Series (Legacy)">
-                            <option value="gemini-2.5-flash">gemini-2.5-flash — Gemini 2.5 Flash</option>
-                            <option value="gemini-2.5-pro">gemini-2.5-pro — Gemini 2.5 Pro</option>
+                        <optgroup label="📦 Gemini 2.5 Series">
+                            <option value="gemini-2.5-flash">gemini-2.5-flash [⚡ 快速 ~2-5s] — Gemini 2.5 Flash</option>
+                            <option value="gemini-2.5-pro">gemini-2.5-pro [🧠 深度 ~6-15s] — Gemini 2.5 Pro</option>
                         </optgroup>
                         <optgroup label="🛠️ 進階自訂">
                             <option value="custom">自訂模型 ID (Custom Endpoint)...</option>
                         </optgroup>
                     </select>
+                    <p id="modelFetchStatusText" class="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                        ℹ️ Google API 並無提供即時預測回應時間，選單內嘅速度標籤為模型級別估算；撳下方「測試連線」可實測準確延遲。
+                    </p>
                 </div>
 
                 <!-- Custom Model ID Input (Revealed when 'custom' is selected) -->
@@ -657,7 +683,7 @@
                 </div>
 
                 <!-- Test Connection Feedback Box -->
-                <div id="apiTestResultBox" class="hidden p-3 rounded-xl text-xs font-medium"></div>
+                <div id="apiTestResultBox" class="hidden p-3 rounded-xl text-xs font-medium leading-relaxed"></div>
             </div>
 
             <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
@@ -686,16 +712,16 @@
                     <i data-lucide="target" class="w-5 h-5 text-emerald-600"></i>
                     <span>設定每日營養目標</span>
                 </h3>
-                <button onclick="closeGoalsModal()" class="text-slate-400 hover:text-slate-600">
+                <button type="button" onclick="closeGoalsModal()" class="text-slate-400 hover:text-slate-600 p-1">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
             <div class="space-y-3 text-xs">
                 <div class="flex gap-2">
-                    <button type="button" onclick="applyGoalPreset(1600, 110, 160, 50)" class="flex-1 py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-medium transition">減脂 (1600 kcal)</button>
-                    <button type="button" onclick="applyGoalPreset(2000, 125, 225, 65)" class="flex-1 py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-medium transition">維持 (2000 kcal)</button>
-                    <button type="button" onclick="applyGoalPreset(2500, 160, 290, 75)" class="flex-1 py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-medium transition">增肌 (2500 kcal)</button>
+                    <button type="button" onclick="applyGoalPreset(1600, 110, 160, 50)" class="flex-1 py-2 px-2 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-semibold transition">減脂 (1600)</button>
+                    <button type="button" onclick="applyGoalPreset(2000, 125, 225, 65)" class="flex-1 py-2 px-2 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-semibold transition">維持 (2000)</button>
+                    <button type="button" onclick="applyGoalPreset(2500, 160, 290, 75)" class="flex-1 py-2 px-2 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 font-semibold transition">增肌 (2500)</button>
                 </div>
 
                 <div>
@@ -719,8 +745,8 @@
             </div>
 
             <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="closeGoalsModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold hover:bg-slate-200">取消</button>
-                <button onclick="saveGoals()" class="px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 shadow-sm">儲存目標</button>
+                <button type="button" onclick="closeGoalsModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-semibold hover:bg-slate-200">取消</button>
+                <button type="button" onclick="saveGoals()" class="px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 shadow-sm">儲存目標</button>
             </div>
         </div>
     </div>
@@ -734,38 +760,93 @@
             <h3 class="font-bold text-slate-900 text-base">確定要清空所有飲食記錄？</h3>
             <p class="text-xs text-slate-500">呢個動作會刪除瀏覽器入面儲存嘅所有飲食記錄，無法復原。</p>
             <div class="flex space-x-2 pt-2">
-                <button onclick="closeClearConfirmModal()" class="flex-1 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold">取消</button>
-                <button onclick="confirmClearAllData()" class="flex-1 py-2 rounded-xl bg-red-600 text-white text-xs font-semibold hover:bg-red-700">確定清空</button>
+                <button type="button" onclick="closeClearConfirmModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold">取消</button>
+                <button type="button" onclick="confirmClearAllData()" class="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-xs font-semibold hover:bg-red-700">確定清空</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
+    <!-- Toast Notification Container -->
     <div id="toastContainer" class="fixed bottom-20 md:bottom-6 right-4 z-50 space-y-2 pointer-events-none"></div>
 
     <script>
+        // ==========================================
+        // Safe DOM, Storage & Icon Helpers
+        // ==========================================
+        function $id(id) {
+            return document.getElementById(id);
+        }
+
+        function setText(id, text) {
+            const el = $id(id);
+            if (el) el.textContent = text;
+        }
+
+        function setVal(id, value) {
+            const el = $id(id);
+            if (el) el.value = value;
+        }
+
+        function getVal(id, fallback = '') {
+            const el = $id(id);
+            return el ? el.value : fallback;
+        }
+
+        function showEl(id) {
+            const el = $id(id);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function hideEl(id) {
+            const el = $id(id);
+            if (el) el.classList.add('hidden');
+        }
+
+        function refreshIcons() {
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+            }
+        }
+
+        function safeStorageGet(key) {
+            try {
+                return window.localStorage.getItem(key);
+            } catch (err) {
+                console.warn('localStorage.getItem unavailable:', err);
+                return null;
+            }
+        }
+
+        function safeStorageSet(key, value) {
+            try {
+                window.localStorage.setItem(key, value);
+                return true;
+            } catch (err) {
+                console.warn('localStorage.setItem unavailable:', err);
+                return false;
+            }
+        }
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         // ==========================================
         // State & Storage Configuration
         // ==========================================
         const STORAGE_KEY_MEALS = 'nutrisnap_hk_meals_v1';
         const STORAGE_KEY_GOALS = 'nutrisnap_hk_goals_v1';
         const STORAGE_KEY_API = 'nutrisnap_hk_api_config_v1';
+        const MAX_UPLOAD_IMAGES = 5;
 
-        // Default environment fallback variable
-        const apiKey = "";
-
-        const PRESET_MODELS = [
-            'gemini-4-hydrogen',
-            'gemini-4-carbon',
-            'gemini-4-argon',
-            'gemini-3.8-flash',
-            'gemini-3.6-flash',
-            'gemini-3.5-flash-lite',
-            'gemini-3.1-pro-preview',
-            'gemini-3-flash-preview',
-            'gemini-2.5-flash',
-            'gemini-2.5-pro'
-        ];
+        // Environment fallback API key (empty by default)
+        const envApiKey = '';
 
         let apiConfig = {
             apiKey: '',
@@ -782,9 +863,7 @@
 
         let selectedDateStr = getTodayDateStr();
         let activeTab = 'record';
-        let currentUploadedImageBase64 = null; // Pure base64 without prefix
-        let currentUploadedMimeType = 'image/jpeg';
-        let currentThumbnailDataUrl = null;   // Compressed small thumbnail for saving in localStorage
+        let currentUploadedImages = []; // Array of { id, base64, mimeType, previewUrl, thumbnailUrl }
         let currentDetectedItems = [];
         let currentAiTip = '';
 
@@ -793,7 +872,7 @@
         let macrosChartInstance = null;
 
         // ==========================================
-        // Utility Helpers
+        // Date, Time & Toast Helpers
         // ==========================================
         function getTodayDateStr() {
             const now = new Date();
@@ -810,8 +889,17 @@
             return `${hours}:${mins}`;
         }
 
+        function getOffsetDateStr(offsetDays) {
+            const d = new Date();
+            d.setDate(d.getDate() + offsetDays);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
         function guessMealTypeByTime(timeStr) {
-            const hour = parseInt(timeStr.split(':')[0], 10);
+            const hour = parseInt((timeStr || '12:00').split(':')[0], 10);
             if (hour >= 5 && hour < 11) return '早餐';
             if (hour >= 11 && hour < 14) return '午餐';
             if (hour >= 14 && hour < 17) return '下午茶';
@@ -820,16 +908,17 @@
         }
 
         function showToast(message, type = 'success') {
-            const container = document.getElementById('toastContainer');
+            const container = $id('toastContainer');
+            if (!container) return;
             const toast = document.createElement('div');
             const bgClass = type === 'error' ? 'bg-red-600' : (type === 'info' ? 'bg-slate-800' : 'bg-emerald-600');
             toast.className = `${bgClass} text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center space-x-2 pointer-events-auto transition-all duration-300`;
-            toast.innerHTML = `<span>${message}</span>`;
+            toast.textContent = message;
             container.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';
                 setTimeout(() => toast.remove(), 300);
-            }, 3500);
+            }, 3400);
         }
 
         // ==========================================
@@ -841,139 +930,263 @@
             initDateTimeInputs();
             switchTab('record');
             renderAllViews();
-            lucide.createIcons();
+            refreshIcons();
 
-            // Close dropdown when clicking outside
+            // Close data dropdown when clicking outside
             document.addEventListener('click', (e) => {
-                const dropdown = document.getElementById('dataDropdown');
-                const btn = document.getElementById('dataMenuBtn');
-                if (dropdown && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+                const dropdown = $id('dataDropdown');
+                const btn = $id('dataMenuBtn');
+                if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
                     dropdown.classList.add('hidden');
                 }
             });
         };
 
         function loadFromStorage() {
-            try {
-                const savedMeals = localStorage.getItem(STORAGE_KEY_MEALS);
-                if (savedMeals) {
-                    mealsData = JSON.parse(savedMeals);
-                } else {
-                    loadSampleData(true);
+            const savedMeals = safeStorageGet(STORAGE_KEY_MEALS);
+            if (savedMeals) {
+                try {
+                    const parsedMeals = JSON.parse(savedMeals);
+                    mealsData = Array.isArray(parsedMeals) ? parsedMeals : [];
+                } catch (e) {
+                    mealsData = [];
                 }
+            } else {
+                loadSampleData(true);
+            }
 
-                const savedGoals = localStorage.getItem(STORAGE_KEY_GOALS);
-                if (savedGoals) {
-                    userGoals = JSON.parse(savedGoals);
+            const savedGoals = safeStorageGet(STORAGE_KEY_GOALS);
+            if (savedGoals) {
+                try {
+                    const parsedGoals = JSON.parse(savedGoals);
+                    if (parsedGoals && typeof parsedGoals === 'object') {
+                        userGoals = {
+                            calories: Number(parsedGoals.calories) || 2000,
+                            protein: Number(parsedGoals.protein) || 125,
+                            carbs: Number(parsedGoals.carbs) || 225,
+                            fat: Number(parsedGoals.fat) || 65
+                        };
+                    }
+                } catch (e) {
+                    console.warn('Invalid goals JSON');
                 }
+            }
 
-                const savedApi = localStorage.getItem(STORAGE_KEY_API);
-                if (savedApi) {
+            const savedApi = safeStorageGet(STORAGE_KEY_API);
+            if (savedApi) {
+                try {
                     const parsedApi = JSON.parse(savedApi);
-                    apiConfig.apiKey = (parsedApi.apiKey || '').trim();
-                    apiConfig.model = (parsedApi.model || 'gemini-4-hydrogen').trim();
+                    if (parsedApi && typeof parsedApi === 'object') {
+                        apiConfig.apiKey = String(parsedApi.apiKey || '').trim();
+                        apiConfig.model = String(parsedApi.model || 'gemini-4-hydrogen').trim() || 'gemini-4-hydrogen';
+                    }
+                } catch (e) {
+                    console.warn('Invalid API config JSON');
                 }
-            } catch (e) {
-                console.error('Failed to read localStorage', e);
             }
         }
 
         function saveMealsToStorage() {
-            try {
-                localStorage.setItem(STORAGE_KEY_MEALS, JSON.stringify(mealsData));
-            } catch (e) {
-                showToast('儲存空間已滿，建議清理舊相片或匯出備份', 'error');
+            const ok = safeStorageSet(STORAGE_KEY_MEALS, JSON.stringify(mealsData));
+            if (!ok) {
+                showToast('瀏覽器儲存空間受限或已滿，建議匯出備份', 'error');
             }
         }
 
         function initDateTimeInputs() {
             selectedDateStr = getTodayDateStr();
             const nowTime = getCurrentTimeStr();
-            document.getElementById('globalDatePicker').value = selectedDateStr;
-            document.getElementById('mealDateInput').value = selectedDateStr;
-            document.getElementById('mealTimeInput').value = nowTime;
-            document.getElementById('mealTypeInput').value = guessMealTypeByTime(nowTime);
+            setVal('globalDatePicker', selectedDateStr);
+            setVal('mealDateInput', selectedDateStr);
+            setVal('mealTimeInput', nowTime);
+            setVal('mealTypeInput', guessMealTypeByTime(nowTime));
         }
 
         // ==========================================
-        // API Configuration Modal & Connection Test
+        // Gemini API Configuration, Auto-Fetch Models & Latency Test
         // ==========================================
         function updateApiStatusUI() {
-            const dot = document.getElementById('apiStatusDot');
-            const navBtn = document.getElementById('apiNavBtn');
-            const modelLabel = document.getElementById('currentModelLabel');
+            const dot = $id('apiStatusDot');
+            const navBtn = $id('apiNavBtn');
+            setText('currentModelLabel', apiConfig.model || 'gemini-4-hydrogen');
 
-            if (modelLabel) {
-                modelLabel.textContent = apiConfig.model || 'gemini-4-hydrogen';
+            const hasKey = Boolean(apiConfig.apiKey && apiConfig.apiKey.trim().length > 5);
+            if (dot && navBtn) {
+                if (hasKey) {
+                    dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                    navBtn.className = 'flex items-center space-x-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold transition border border-emerald-200/80';
+                } else {
+                    dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+                    navBtn.className = 'flex items-center space-x-1.5 px-2.5 sm:px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition border border-transparent';
+                }
             }
+        }
 
-            const hasCustomKey = Boolean(apiConfig.apiKey && apiConfig.apiKey.trim().length > 5);
-            if (hasCustomKey) {
-                dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
-                navBtn.className = 'flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-semibold transition border border-emerald-200/80';
-            } else {
-                dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
-                navBtn.className = 'flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition border border-transparent';
+        function getModelSpeedBadge(modelId) {
+            const id = String(modelId || '').toLowerCase();
+            if (id.includes('lite') || id.includes('8b') || id.includes('nano')) {
+                return '⚡ 極速 ~1-3s';
             }
+            if (id.includes('pro') || id.includes('carbon') || id.includes('argon') || id.includes('thinking') || id.includes('ultra')) {
+                return '🧠 深度 ~6-15s';
+            }
+            if (id.includes('flash') || id.includes('hydrogen')) {
+                return '⚡ 快速 ~2-5s';
+            }
+            return '⚖️ 均衡 ~3-6s';
         }
 
         function handleModelSelectChange() {
-            const selectEl = document.getElementById('inputApiModel');
-            const customContainer = document.getElementById('customModelContainer');
+            const selectEl = $id('inputApiModel');
+            if (!selectEl) return;
             if (selectEl.value === 'custom') {
-                customContainer.classList.remove('hidden');
-                document.getElementById('inputCustomModel').focus();
+                showEl('customModelContainer');
+                const customInput = $id('inputCustomModel');
+                if (customInput) customInput.focus();
             } else {
-                customContainer.classList.add('hidden');
+                hideEl('customModelContainer');
             }
         }
 
         function getSelectedModelFromModal() {
-            const selectVal = document.getElementById('inputApiModel').value;
+            const selectVal = getVal('inputApiModel', 'gemini-4-hydrogen');
             if (selectVal === 'custom') {
-                const customVal = document.getElementById('inputCustomModel').value.trim();
+                const customVal = getVal('inputCustomModel', '').trim();
                 return customVal || 'gemini-4-hydrogen';
             }
             return selectVal || 'gemini-4-hydrogen';
         }
 
-        function openApiConfigModal(reasonMessage = '') {
-            document.getElementById('inputApiKey').value = apiConfig.apiKey || '';
-            const currentModel = apiConfig.model || 'gemini-4-hydrogen';
-            const selectEl = document.getElementById('inputApiModel');
-            const customInput = document.getElementById('inputCustomModel');
+        function syncModalModelSelection(targetModel) {
+            const selectEl = $id('inputApiModel');
+            if (!selectEl) return;
+            const modelId = String(targetModel || 'gemini-4-hydrogen').trim();
+            const matchingOption = Array.from(selectEl.options).find(opt => opt.value === modelId && opt.value !== 'custom');
 
-            if (PRESET_MODELS.includes(currentModel)) {
-                selectEl.value = currentModel;
-                customInput.value = '';
+            if (matchingOption) {
+                selectEl.value = modelId;
+                setVal('inputCustomModel', '');
             } else {
                 selectEl.value = 'custom';
-                customInput.value = currentModel;
+                setVal('inputCustomModel', modelId);
             }
             handleModelSelectChange();
+        }
 
-            document.getElementById('apiTestResultBox').classList.add('hidden');
+        async function fetchAvailableModels(silent = false) {
+            const keyVal = getVal('inputApiKey', '').trim() || apiConfig.apiKey || envApiKey;
+            const fetchBtn = $id('fetchModelsBtn');
+            const statusText = $id('modelFetchStatusText');
+            const liveOptGroup = $id('liveModelsOptGroup');
 
-            const reasonBox = document.getElementById('apiModalReasonBox');
-            const reasonText = document.getElementById('apiModalReasonText');
-            if (reasonMessage) {
-                reasonText.textContent = reasonMessage;
-                reasonBox.classList.remove('hidden');
-            } else {
-                reasonBox.classList.add('hidden');
+            if (!keyVal) {
+                if (!silent) {
+                    showToast('請先輸入 Gemini API Key 先可以讀取可用模型！', 'error');
+                }
+                return;
             }
 
-            document.getElementById('apiConfigModal').classList.remove('hidden');
-            lucide.createIcons();
+            const prevSelected = getSelectedModelFromModal();
+            if (fetchBtn) {
+                fetchBtn.disabled = true;
+                fetchBtn.classList.add('opacity-60');
+            }
+            if (!silent && statusText) {
+                statusText.textContent = '⏳ 正在向 Google API 讀取你帳號實時可用嘅 Gemini 模型...';
+            }
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(keyVal)}&pageSize=100`;
+                const response = await fetch(url);
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    throw new Error(data?.error?.message || `HTTP ${response.status}`);
+                }
+
+                const rawModels = Array.isArray(data.models) ? data.models : [];
+                const geminiModels = rawModels
+                    .filter(m => {
+                        const name = String(m.name || '').toLowerCase();
+                        const methods = Array.isArray(m.supportedGenerationMethods) ? m.supportedGenerationMethods : [];
+                        return name.includes('gemini') && methods.includes('generateContent');
+                    })
+                    .map(m => {
+                        const cleanId = String(m.name || '').replace(/^models\//, '');
+                        return {
+                            id: cleanId,
+                            speedBadge: getModelSpeedBadge(cleanId)
+                        };
+                    })
+                    .sort((a, b) => b.id.localeCompare(a.id));
+
+                if (liveOptGroup) {
+                    if (geminiModels.length > 0) {
+                        liveOptGroup.innerHTML = geminiModels.map(m => {
+                            const label = `${m.id} [${m.speedBadge}]`;
+                            return `<option value="${escapeHtml(m.id)}">${escapeHtml(label)}</option>`;
+                        }).join('');
+                        liveOptGroup.classList.remove('hidden');
+                        syncModalModelSelection(prevSelected || apiConfig.model);
+
+                        if (statusText) {
+                            statusText.textContent = `✅ 已讀取 ${geminiModels.length} 個帳號實時可用模型。Google API 唔提供即時預測延遲，速度標籤為級別估算，按「測試連線」可實測準確延遲。`;
+                        }
+                        if (!silent) {
+                            showToast(`✅ 成功讀取 ${geminiModels.length} 個可用 Gemini 模型！`);
+                        }
+                    } else {
+                        liveOptGroup.classList.add('hidden');
+                        if (statusText) {
+                            statusText.textContent = '⚠️ 未能搵到支援 generateContent 嘅 Gemini 模型，請使用下方預設或自訂模型。';
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Fetch models error:', err);
+                if (!silent) {
+                    showToast(`讀取模型失敗：${err.message || '請檢查 API Key'}`, 'error');
+                    if (statusText) {
+                        statusText.textContent = `❌ 讀取可用模型失敗 (${err.message || '請檢查 API Key'})。仍可使用下方預設清單或自訂模型。`;
+                    }
+                }
+            } finally {
+                if (fetchBtn) {
+                    fetchBtn.disabled = false;
+                    fetchBtn.classList.remove('opacity-60');
+                }
+            }
+        }
+
+        function openApiConfigModal(reasonMessage = '') {
+            setVal('inputApiKey', apiConfig.apiKey || '');
+            syncModalModelSelection(apiConfig.model || 'gemini-4-hydrogen');
+            hideEl('apiTestResultBox');
+
+            if (reasonMessage) {
+                setText('apiModalReasonText', reasonMessage);
+                showEl('apiModalReasonBox');
+            } else {
+                hideEl('apiModalReasonBox');
+            }
+
+            showEl('apiConfigModal');
+            refreshIcons();
+
+            // Auto-fetch live available models if API key is already saved
+            if (apiConfig.apiKey && apiConfig.apiKey.trim().length > 5) {
+                fetchAvailableModels(true);
+            }
         }
 
         function closeApiConfigModal() {
-            document.getElementById('apiConfigModal').classList.add('hidden');
+            hideEl('apiConfigModal');
         }
 
         function toggleApiKeyVisibility() {
-            const input = document.getElementById('inputApiKey');
-            const icon = document.getElementById('apiKeyEyeIcon');
+            const input = $id('inputApiKey');
+            const icon = $id('apiKeyEyeIcon');
+            if (!input || !icon) return;
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.setAttribute('data-lucide', 'eye-off');
@@ -981,26 +1194,26 @@
                 input.type = 'password';
                 icon.setAttribute('data-lucide', 'eye');
             }
-            lucide.createIcons();
+            refreshIcons();
         }
 
         function saveApiConfig() {
-            const keyVal = document.getElementById('inputApiKey').value.trim();
-            const selectVal = document.getElementById('inputApiModel').value;
-            if (selectVal === 'custom' && !document.getElementById('inputCustomModel').value.trim()) {
+            const keyVal = getVal('inputApiKey', '').trim();
+            const selectVal = getVal('inputApiModel', 'gemini-4-hydrogen');
+
+            if (selectVal === 'custom' && !getVal('inputCustomModel', '').trim()) {
                 showToast('請輸入自訂模型 ID！', 'error');
                 return;
             }
 
             const modelVal = getSelectedModelFromModal();
-
             apiConfig.apiKey = keyVal;
             apiConfig.model = modelVal;
-            localStorage.setItem(STORAGE_KEY_API, JSON.stringify(apiConfig));
+            safeStorageSet(STORAGE_KEY_API, JSON.stringify(apiConfig));
 
             updateApiStatusUI();
             closeApiConfigModal();
-            document.getElementById('apiErrorBanner')?.classList.add('hidden');
+            hideEl('apiErrorBanner');
 
             if (keyVal) {
                 showToast(`✅ 已儲存 Gemini API Key 及模型 (${modelVal})`);
@@ -1011,61 +1224,85 @@
 
         function clearSavedApiKey() {
             apiConfig.apiKey = '';
-            document.getElementById('inputApiKey').value = '';
-            localStorage.setItem(STORAGE_KEY_API, JSON.stringify(apiConfig));
+            setVal('inputApiKey', '');
+            safeStorageSet(STORAGE_KEY_API, JSON.stringify(apiConfig));
             updateApiStatusUI();
 
-            const testBox = document.getElementById('apiTestResultBox');
-            testBox.className = 'p-3 rounded-xl text-xs font-medium bg-slate-100 text-slate-600';
-            testBox.textContent = '已清除瀏覽器儲存嘅 API Key。';
-            testBox.classList.remove('hidden');
+            const liveOptGroup = $id('liveModelsOptGroup');
+            if (liveOptGroup) {
+                liveOptGroup.innerHTML = '';
+                liveOptGroup.classList.add('hidden');
+            }
+
+            const testBox = $id('apiTestResultBox');
+            if (testBox) {
+                testBox.className = 'p-3 rounded-xl text-xs font-medium bg-slate-100 text-slate-600';
+                testBox.textContent = '已清除瀏覽器儲存嘅 API Key。';
+                testBox.classList.remove('hidden');
+            }
             showToast('🗑️ 已清除儲存嘅 API Key', 'info');
         }
 
         async function testGeminiConnection() {
-            const keyVal = document.getElementById('inputApiKey').value.trim() || apiKey;
+            const keyVal = getVal('inputApiKey', '').trim() || envApiKey;
             const modelVal = getSelectedModelFromModal();
-            const testBox = document.getElementById('apiTestResultBox');
-            const testBtn = document.getElementById('testApiBtn');
+            const testBox = $id('apiTestResultBox');
+            const testBtn = $id('testApiBtn');
 
             if (!keyVal) {
-                testBox.className = 'p-3 rounded-xl text-xs font-medium bg-red-50 text-red-700 border border-red-200';
-                testBox.textContent = '❌ 請先喺上方輸入你嘅 Gemini API Key 先可以測試連線。';
-                testBox.classList.remove('hidden');
+                if (testBox) {
+                    testBox.className = 'p-3 rounded-xl text-xs font-medium bg-red-50 text-red-700 border border-red-200';
+                    testBox.textContent = '❌ 請先喺上方輸入你嘅 Gemini API Key 先可以測試連線。';
+                    testBox.classList.remove('hidden');
+                }
                 return;
             }
 
-            testBtn.disabled = true;
-            testBtn.classList.add('opacity-60');
-            testBox.className = 'p-3 rounded-xl text-xs font-medium bg-slate-100 text-slate-700';
-            testBox.textContent = `⏳ 正在測試連線至 ${modelVal}...`;
-            testBox.classList.remove('hidden');
+            if (testBtn) {
+                testBtn.disabled = true;
+                testBtn.classList.add('opacity-60');
+            }
+            if (testBox) {
+                testBox.className = 'p-3 rounded-xl text-xs font-medium bg-slate-100 text-slate-700';
+                testBox.textContent = `⏳ 正在測試連線並量度 ${modelVal} 回應延遲...`;
+                testBox.classList.remove('hidden');
+            }
 
             try {
+                const startTime = performance.now();
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelVal)}:generateContent?key=${encodeURIComponent(keyVal)}`;
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ role: 'user', parts: [{ text: '請回覆「OK」兩個字' }] }]
+                        contents: [{ role: 'user', parts: [{ text: '請只回覆 OK' }] }]
                     })
                 });
 
                 const data = await response.json().catch(() => ({}));
+                const elapsedMs = Math.round(performance.now() - startTime);
+                const elapsedSec = (elapsedMs / 1000).toFixed(2);
+
                 if (!response.ok) {
                     const errMsg = data?.error?.message || `HTTP ${response.status}`;
                     throw new Error(errMsg);
                 }
 
                 const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'OK';
-                testBox.className = 'p-3 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200';
-                testBox.textContent = `✅ 連線成功！模型 (${modelVal}) 回應正常 (${reply.trim().slice(0, 20)})。記得撳「儲存設定」！`;
+                if (testBox) {
+                    testBox.className = 'p-3 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200';
+                    testBox.textContent = `✅ 連線成功！實測延遲：${elapsedSec} 秒 (${elapsedMs} ms) — 模型 (${modelVal}) 回應正常 (${reply.trim().slice(0, 20)})。記得撳「儲存設定」！`;
+                }
             } catch (err) {
-                testBox.className = 'p-3 rounded-xl text-xs font-medium bg-red-50 text-red-700 border border-red-200';
-                testBox.textContent = `❌ 連線失敗：${err.message || '請檢查 API Key 是否正確或更換模型'}`;
+                if (testBox) {
+                    testBox.className = 'p-3 rounded-xl text-xs font-medium bg-red-50 text-red-700 border border-red-200';
+                    testBox.textContent = `❌ 連線失敗：${err.message || '請檢查 API Key 是否正確或更換模型'}`;
+                }
             } finally {
-                testBtn.disabled = false;
-                testBtn.classList.remove('opacity-60');
+                if (testBtn) {
+                    testBtn.disabled = false;
+                    testBtn.classList.remove('opacity-60');
+                }
             }
         }
 
@@ -1076,31 +1313,24 @@
             activeTab = tabName;
             const tabs = ['record', 'daily', 'weekly'];
             tabs.forEach(t => {
-                const section = document.getElementById(`tab-${t}`);
-                if (t === tabName) {
-                    section.classList.remove('hidden');
-                } else {
-                    section.classList.add('hidden');
+                const section = $id(`tab-${t}`);
+                if (section) {
+                    if (t === tabName) section.classList.remove('hidden');
+                    else section.classList.add('hidden');
                 }
 
-                // Desktop buttons
-                const dBtn = document.getElementById(`tabBtn-${t}-desktop`);
+                const dBtn = $id(`tabBtn-${t}-desktop`);
                 if (dBtn) {
-                    if (t === tabName) {
-                        dBtn.className = 'px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 bg-white text-emerald-700 shadow-sm';
-                    } else {
-                        dBtn.className = 'px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 text-slate-600 hover:text-slate-900';
-                    }
+                    dBtn.className = (t === tabName)
+                        ? 'px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 bg-white text-emerald-700 shadow-sm'
+                        : 'px-4 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 text-slate-600 hover:text-slate-900';
                 }
 
-                // Mobile buttons
-                const mBtn = document.getElementById(`tabBtn-${t}-mobile`);
+                const mBtn = $id(`tabBtn-${t}-mobile`);
                 if (mBtn) {
-                    if (t === tabName) {
-                        mBtn.className = 'flex flex-col items-center py-1 px-4 rounded-xl text-xs font-bold text-emerald-600 bg-emerald-50/80 transition';
-                    } else {
-                        mBtn.className = 'flex flex-col items-center py-1 px-4 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 transition';
-                    }
+                    mBtn.className = (t === tabName)
+                        ? 'flex flex-col items-center py-1 px-4 rounded-xl text-xs font-bold text-emerald-600 bg-emerald-50/80 transition'
+                        : 'flex flex-col items-center py-1 px-4 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-800 transition';
                 }
             });
 
@@ -1110,7 +1340,7 @@
         function onGlobalDateChange(newDateStr) {
             if (!newDateStr) return;
             selectedDateStr = newDateStr;
-            document.getElementById('mealDateInput').value = selectedDateStr;
+            setVal('mealDateInput', selectedDateStr);
             renderAllViews();
         }
 
@@ -1121,81 +1351,165 @@
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const day = String(d.getDate()).padStart(2, '0');
             selectedDateStr = `${year}-${month}-${day}`;
-            document.getElementById('globalDatePicker').value = selectedDateStr;
-            document.getElementById('mealDateInput').value = selectedDateStr;
+            setVal('globalDatePicker', selectedDateStr);
+            setVal('mealDateInput', selectedDateStr);
             renderAllViews();
         }
 
         function goToToday() {
             selectedDateStr = getTodayDateStr();
-            document.getElementById('globalDatePicker').value = selectedDateStr;
-            document.getElementById('mealDateInput').value = selectedDateStr;
+            setVal('globalDatePicker', selectedDateStr);
+            setVal('mealDateInput', selectedDateStr);
             renderAllViews();
         }
 
         // ==========================================
-        // Image Upload & Compression
+        // Multi-Photo Upload, Camera Capture & Compression
         // ==========================================
-        function handleImageUpload(event) {
-            const file = event.target.files?.[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const img = new Image();
-                img.onload = function () {
-                    // Resize image to max 800px for Gemini API call
-                    const canvas = document.createElement('canvas');
-                    const MAX_SIZE = 800;
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > height && width > MAX_SIZE) {
-                        height *= MAX_SIZE / width;
-                        width = MAX_SIZE;
-                    } else if (height > MAX_SIZE) {
-                        width *= MAX_SIZE / height;
-                        height = MAX_SIZE;
-                    }
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    const fullDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    currentUploadedImageBase64 = fullDataUrl.split(',')[1];
-                    currentUploadedMimeType = 'image/jpeg';
-
-                    // Also create a small 140px thumbnail for localStorage log
-                    const thumbCanvas = document.createElement('canvas');
-                    const THUMB_SIZE = 140;
-                    const scale = Math.min(THUMB_SIZE / width, THUMB_SIZE / height);
-                    thumbCanvas.width = width * scale;
-                    thumbCanvas.height = height * scale;
-                    thumbCanvas.getContext('2d').drawImage(img, 0, 0, thumbCanvas.width, thumbCanvas.height);
-                    currentThumbnailDataUrl = thumbCanvas.toDataURL('image/jpeg', 0.7);
-
-                    // Show preview
-                    document.getElementById('imagePreviewEl').src = fullDataUrl;
-                    document.getElementById('uploadPlaceholder').classList.add('hidden');
-                    document.getElementById('imagePreviewContainer').classList.remove('hidden');
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        function triggerCameraUpload() {
+            if (currentUploadedImages.length >= MAX_UPLOAD_IMAGES) {
+                showToast(`每餐最多只可加入 ${MAX_UPLOAD_IMAGES} 張相片！`, 'error');
+                return;
+            }
+            const input = $id('cameraImageInput');
+            if (input) input.click();
         }
 
-        function clearImage(event) {
-            if (event) event.stopPropagation();
-            currentUploadedImageBase64 = null;
-            currentThumbnailDataUrl = null;
-            document.getElementById('foodImageInput').value = '';
-            document.getElementById('imagePreviewEl').src = '';
-            document.getElementById('uploadPlaceholder').classList.remove('hidden');
-            document.getElementById('imagePreviewContainer').classList.add('hidden');
+        function triggerGalleryUpload() {
+            if (currentUploadedImages.length >= MAX_UPLOAD_IMAGES) {
+                showToast(`每餐最多只可加入 ${MAX_UPLOAD_IMAGES} 張相片！`, 'error');
+                return;
+            }
+            const input = $id('galleryImageInput');
+            if (input) input.click();
+        }
+
+        function processImageFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = () => reject(new Error('讀取圖片失敗'));
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.onerror = () => reject(new Error('圖片格式無法解析'));
+                    img.onload = function () {
+                        // Resize image to max 800px JPEG for Gemini API call
+                        const canvas = document.createElement('canvas');
+                        const MAX_SIZE = 800;
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > height && width > MAX_SIZE) {
+                            height = Math.round(height * (MAX_SIZE / width));
+                            width = MAX_SIZE;
+                        } else if (height > MAX_SIZE) {
+                            width = Math.round(width * (MAX_SIZE / height));
+                            height = MAX_SIZE;
+                        }
+                        canvas.width = Math.max(1, width);
+                        canvas.height = Math.max(1, height);
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                        const fullDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        const base64Data = fullDataUrl.split(',')[1];
+
+                        // Create a small 140px JPEG thumbnail for localStorage log
+                        const thumbCanvas = document.createElement('canvas');
+                        const THUMB_SIZE = 140;
+                        const scale = Math.min(THUMB_SIZE / canvas.width, THUMB_SIZE / canvas.height, 1);
+                        thumbCanvas.width = Math.max(1, Math.round(canvas.width * scale));
+                        thumbCanvas.height = Math.max(1, Math.round(canvas.height * scale));
+                        thumbCanvas.getContext('2d').drawImage(img, 0, 0, thumbCanvas.width, thumbCanvas.height);
+                        const thumbnailUrl = thumbCanvas.toDataURL('image/jpeg', 0.7);
+
+                        resolve({
+                            id: 'img_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+                            base64: base64Data,
+                            mimeType: 'image/jpeg',
+                            previewUrl: fullDataUrl,
+                            thumbnailUrl: thumbnailUrl
+                        });
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleImageUpload(event) {
+            const inputEl = event.target;
+            const files = Array.from(inputEl?.files || []);
+            // Reset input immediately so users can take/select more photos consecutively
+            if (inputEl) inputEl.value = '';
+            if (files.length === 0) return;
+
+            const remainingSlots = MAX_UPLOAD_IMAGES - currentUploadedImages.length;
+            if (remainingSlots <= 0) {
+                showToast(`每餐最多只可加入 ${MAX_UPLOAD_IMAGES} 張相片！`, 'error');
+                return;
+            }
+
+            const filesToProcess = files.slice(0, remainingSlots);
+            if (files.length > remainingSlots) {
+                showToast(`已達上限，只會加入前 ${remainingSlots} 張相片（最多 ${MAX_UPLOAD_IMAGES} 張）`, 'info');
+            }
+
+            for (const file of filesToProcess) {
+                try {
+                    const processed = await processImageFile(file);
+                    currentUploadedImages.push(processed);
+                } catch (err) {
+                    console.error('Image processing error:', err);
+                    showToast('部分相片無法讀取，請重試', 'error');
+                }
+            }
+
+            renderUploadedImagesGrid();
+        }
+
+        function renderUploadedImagesGrid() {
+            const grid = $id('uploadedImagesGrid');
+            if (!grid) return;
+
+            if (currentUploadedImages.length === 0) {
+                grid.innerHTML = '';
+                hideEl('uploadedImagesGrid');
+                showEl('uploadEmptyHint');
+                hideEl('photoCountActions');
+                return;
+            }
+
+            hideEl('uploadEmptyHint');
+            showEl('photoCountActions');
+            setText('photoCounterBadge', `已加入 ${currentUploadedImages.length} / ${MAX_UPLOAD_IMAGES} 張`);
+            showEl('uploadedImagesGrid');
+
+            grid.innerHTML = currentUploadedImages.map((imgObj, idx) => `
+                <div class="relative group aspect-square rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
+                    <img src="${imgObj.previewUrl}" alt="Food ${idx + 1}" class="w-full h-full object-cover">
+                    <span class="absolute bottom-1 left-1 bg-slate-900/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md">#${idx + 1}</span>
+                    <button type="button" onclick="removeUploadedImage('${imgObj.id}')" class="absolute top-1 right-1 bg-slate-900/75 hover:bg-red-600 text-white p-1 rounded-full shadow transition" title="移除此相片">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            refreshIcons();
+        }
+
+        function removeUploadedImage(imgId) {
+            currentUploadedImages = currentUploadedImages.filter(img => img.id !== imgId);
+            renderUploadedImagesGrid();
+        }
+
+        function clearAllImages() {
+            currentUploadedImages = [];
+            setVal('cameraImageInput', '');
+            setVal('galleryImageInput', '');
+            renderUploadedImagesGrid();
         }
 
         function fillPreset(text) {
-            document.getElementById('foodTextInput').value = text;
+            setVal('foodTextInput', text);
         }
 
         // ==========================================
@@ -1207,7 +1521,7 @@
                 try {
                     const response = await fetch(url, options);
                     if (response.ok) return response;
-                    // Do not retry on client errors like 400, 401, 403, 404
+                    // Do not retry client errors (400, 401, 403, 404)
                     if (response.status !== 429 && response.status < 500) {
                         return response;
                     }
@@ -1221,84 +1535,90 @@
         }
 
         async function analyzeFoodWithGemini() {
-            const textDesc = document.getElementById('foodTextInput').value.trim();
-            if (!currentUploadedImageBase64 && !textDesc) {
+            const textDesc = getVal('foodTextInput', '').trim();
+            if (currentUploadedImages.length === 0 && !textDesc) {
                 showToast('請至少上傳一張食物相片或者輸入文字描述！', 'error');
                 return;
             }
 
-            const effectiveApiKey = (apiConfig.apiKey && apiConfig.apiKey.trim()) ? apiConfig.apiKey.trim() : apiKey;
+            const effectiveApiKey = (apiConfig.apiKey && apiConfig.apiKey.trim()) ? apiConfig.apiKey.trim() : envApiKey;
             const selectedModel = apiConfig.model || 'gemini-4-hydrogen';
 
-            const analyzeBtn = document.getElementById('analyzeBtn');
-            const loadingBox = document.getElementById('aiLoadingBox');
-            const resultForm = document.getElementById('resultEditForm');
-            const errorBanner = document.getElementById('apiErrorBanner');
+            if (!effectiveApiKey) {
+                openApiConfigModal('偵測到尚未設定 Gemini API Key，請先輸入你嘅 API Key！');
+                return;
+            }
 
-            errorBanner.classList.add('hidden');
-            analyzeBtn.disabled = true;
-            analyzeBtn.classList.add('opacity-60');
-            loadingBox.classList.remove('hidden');
-            resultForm.classList.add('opacity-40', 'pointer-events-none');
+            const analyzeBtn = $id('analyzeBtn');
+            const resultForm = $id('resultEditForm');
+
+            hideEl('apiErrorBanner');
+            if (analyzeBtn) {
+                analyzeBtn.disabled = true;
+                analyzeBtn.classList.add('opacity-60');
+            }
+            showEl('aiLoadingBox');
+            if (resultForm) resultForm.classList.add('opacity-40', 'pointer-events-none');
 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(selectedModel)}:generateContent?key=${encodeURIComponent(effectiveApiKey)}`;
 
-            const systemPrompt = `你係一位專業嘅香港註冊營養師，熟悉香港茶餐廳、酒樓點心、兩餸飯、街頭小食以及各國料理嘅卡路里同三大營養素（蛋白質、碳水化合物、脂肪）。
-請根據用家提供嘅食物相片及/或文字描述，準確估算呢一餐嘅總卡路里(kcal)、蛋白質(g)、碳水化合物(g)同埋脂肪(g)，並拆解入面嘅主要食材項目。
-請用繁體中文（廣東話口吻）撰寫簡短實用嘅營養師貼士（例如點樣配搭更健康、少汁少飯建議等）。`;
+            const systemPrompt = '你係一位專業嘅香港註冊營養師，熟悉香港茶餐廳、酒樓點心、兩餸飯、街頭小食以及各國料理嘅卡路里同三大營養素（蛋白質、碳水化合物、脂肪）。請根據用家提供嘅所有食物相片及/或文字描述，準確估算呢一餐嘅總卡路里(kcal)、蛋白質(g)、碳水化合物(g)同埋脂肪(g)，並拆解入面嘅主要食材項目。請用繁體中文（廣東話口吻）撰寫簡短實用嘅營養師貼士（例如點樣配搭更健康、少汁少飯建議等）。';
 
             const userParts = [];
-            let promptText = "請分析呢餐食物嘅營養成分並以 JSON 格式回傳。";
+            let promptText = '請分析呢餐食物嘅營養成分並以 JSON 格式回傳。';
+            if (currentUploadedImages.length > 1) {
+                promptText += `\n注意：以下共有 ${currentUploadedImages.length} 張相片，全部都係同一餐食物嘅唔同角度或唔同菜式，請綜合所有相片計算整餐總熱量與營養素，並避免重複計算同一碟餸。`;
+            }
             if (textDesc) {
                 promptText += `\n用家文字描述：「${textDesc}」`;
             }
             userParts.push({ text: promptText });
 
-            if (currentUploadedImageBase64) {
+            currentUploadedImages.forEach(imgObj => {
                 userParts.push({
                     inlineData: {
-                        mimeType: currentUploadedMimeType,
-                        data: currentUploadedImageBase64
+                        mimeType: imgObj.mimeType,
+                        data: imgObj.base64
                     }
                 });
-            }
+            });
 
             const payload = {
                 contents: [{
-                    role: "user",
+                    role: 'user',
                     parts: userParts
                 }],
                 systemInstruction: {
                     parts: [{ text: systemPrompt }]
                 },
                 generationConfig: {
-                    responseMimeType: "application/json",
+                    responseMimeType: 'application/json',
                     responseSchema: {
-                        type: "OBJECT",
+                        type: 'OBJECT',
                         properties: {
-                            dishName: { type: "STRING", description: "餐點總名稱（例如：叉雞飯少飯配凍檸茶）" },
-                            totalCalories: { type: "NUMBER", description: "總卡路里 (kcal)" },
-                            protein: { type: "NUMBER", description: "總蛋白質 (克 g)" },
-                            carbs: { type: "NUMBER", description: "總碳水化合物 (克 g)" },
-                            fat: { type: "NUMBER", description: "總脂肪 (克 g)" },
+                            dishName: { type: 'STRING', description: '餐點總名稱（例如：叉雞飯少飯配凍檸茶）' },
+                            totalCalories: { type: 'NUMBER', description: '總卡路里 (kcal)' },
+                            protein: { type: 'NUMBER', description: '總蛋白質 (克 g)' },
+                            carbs: { type: 'NUMBER', description: '總碳水化合物 (克 g)' },
+                            fat: { type: 'NUMBER', description: '總脂肪 (克 g)' },
                             items: {
-                                type: "ARRAY",
+                                type: 'ARRAY',
                                 items: {
-                                    type: "OBJECT",
+                                    type: 'OBJECT',
                                     properties: {
-                                        name: { type: "STRING" },
-                                        portion: { type: "STRING" },
-                                        calories: { type: "NUMBER" },
-                                        protein: { type: "NUMBER" },
-                                        carbs: { type: "NUMBER" },
-                                        fat: { type: "NUMBER" }
+                                        name: { type: 'STRING' },
+                                        portion: { type: 'STRING' },
+                                        calories: { type: 'NUMBER' },
+                                        protein: { type: 'NUMBER' },
+                                        carbs: { type: 'NUMBER' },
+                                        fat: { type: 'NUMBER' }
                                     },
-                                    required: ["name", "portion", "calories", "protein", "carbs", "fat"]
+                                    required: ['name', 'portion', 'calories', 'protein', 'carbs', 'fat']
                                 }
                             },
-                            tip: { type: "STRING", description: "廣東話營養師簡短建議" }
+                            tip: { type: 'STRING', description: '廣東話營養師簡短建議' }
                         },
-                        required: ["dishName", "totalCalories", "protein", "carbs", "fat", "items", "tip"]
+                        required: ['dishName', 'totalCalories', 'protein', 'carbs', 'fat', 'items', 'tip']
                     }
                 }
             };
@@ -1314,9 +1634,8 @@
 
                 if (!response.ok) {
                     const apiErrMsg = result?.error?.message || `HTTP 錯誤 (${response.status})`;
-                    // Check if error is caused by missing or invalid API key
-                    if (response.status === 400 || response.status === 401 || response.status === 403 || !effectiveApiKey) {
-                        openApiConfigModal(`API 驗證失敗 (${apiErrMsg})。請輸入有效嘅 Gemini API Key 後再試！`);
+                    if (response.status === 400 || response.status === 401 || response.status === 403) {
+                        openApiConfigModal(`API 驗證失敗 (${apiErrMsg})。請輸入有效嘅 Gemini API Key 或切換可用模型後再試！`);
                     }
                     throw new Error(apiErrMsg);
                 }
@@ -1326,8 +1645,10 @@
                     throw new Error('未能從 Gemini 取得有效分析結果');
                 }
 
-                // Clean markdown code fences if present
-                jsonText = jsonText.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+                // Safely strip optional markdown fences without literal triple backticks
+                const fencePrefix = new RegExp('^\\x60{3}(?:json)?\\s*', 'i');
+                const fenceSuffix = new RegExp('\\x60{3}\\s*$', 'i');
+                jsonText = jsonText.replace(fencePrefix, '').replace(fenceSuffix, '').trim();
 
                 const parsed = JSON.parse(jsonText);
                 populateAnalysisResult(parsed);
@@ -1335,96 +1656,94 @@
             } catch (err) {
                 console.error('Gemini API Error:', err);
                 const errDetail = err.message || '未知網絡或 API 錯誤';
-                document.getElementById('apiErrorText').textContent = `${errDetail} （目前使用模型：${selectedModel}）`;
-                errorBanner.classList.remove('hidden');
-
-                if (!effectiveApiKey) {
-                    openApiConfigModal('偵測到尚未設定 Gemini API Key，請先輸入你嘅 API Key！');
-                }
-                showToast('AI 分析未能完成，請檢查 API Key 設定', 'error');
+                setText('apiErrorText', `${errDetail} （目前使用模型：${selectedModel}）`);
+                showEl('apiErrorBanner');
+                showToast('AI 分析未能完成，請檢查 API Key 或模型設定', 'error');
             } finally {
-                analyzeBtn.disabled = false;
-                analyzeBtn.classList.remove('opacity-60');
-                loadingBox.classList.add('hidden');
-                resultForm.classList.remove('opacity-40', 'pointer-events-none');
-                lucide.createIcons();
+                if (analyzeBtn) {
+                    analyzeBtn.disabled = false;
+                    analyzeBtn.classList.remove('opacity-60');
+                }
+                hideEl('aiLoadingBox');
+                if (resultForm) resultForm.classList.remove('opacity-40', 'pointer-events-none');
+                refreshIcons();
             }
         }
 
         function populateAnalysisResult(data) {
-            document.getElementById('resDishName').value = data.dishName || '自訂餐點';
-            document.getElementById('resCalories').value = Math.round(data.totalCalories || 0);
-            document.getElementById('resProtein').value = Math.round((data.protein || 0) * 10) / 10;
-            document.getElementById('resCarbs').value = Math.round((data.carbs || 0) * 10) / 10;
-            document.getElementById('resFat').value = Math.round((data.fat || 0) * 10) / 10;
+            setVal('resDishName', data.dishName || '自訂餐點');
+            setVal('resCalories', Math.round(Number(data.totalCalories) || 0));
+            setVal('resProtein', Math.round((Number(data.protein) || 0) * 10) / 10);
+            setVal('resCarbs', Math.round((Number(data.carbs) || 0) * 10) / 10);
+            setVal('resFat', Math.round((Number(data.fat) || 0) * 10) / 10);
 
             currentDetectedItems = Array.isArray(data.items) ? data.items : [];
             currentAiTip = data.tip || '';
 
-            const breakdownSection = document.getElementById('breakdownSection');
-            const breakdownContainer = document.getElementById('breakdownItemsContainer');
-            if (currentDetectedItems.length > 0) {
-                breakdownSection.classList.remove('hidden');
+            const breakdownContainer = $id('breakdownItemsContainer');
+            if (currentDetectedItems.length > 0 && breakdownContainer) {
+                showEl('breakdownSection');
                 breakdownContainer.innerHTML = currentDetectedItems.map(item => `
-                    <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                        <div>
+                    <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs gap-2">
+                        <div class="min-w-0">
                             <span class="font-semibold text-slate-800">${escapeHtml(item.name)}</span>
                             <span class="text-slate-400 ml-1">(${escapeHtml(item.portion)})</span>
                         </div>
-                        <div class="text-right text-[11px] text-slate-600 space-x-1.5">
-                            <span class="font-bold text-orange-600">${Math.round(item.calories)} kcal</span>
-                            <span>P:${Math.round(item.protein)}g</span>
-                            <span>C:${Math.round(item.carbs)}g</span>
-                            <span>F:${Math.round(item.fat)}g</span>
+                        <div class="text-right text-[11px] text-slate-600 space-x-1.5 shrink-0">
+                            <span class="font-bold text-orange-600">${Math.round(Number(item.calories) || 0)} kcal</span>
+                            <span>P:${Math.round(Number(item.protein) || 0)}g</span>
+                            <span>C:${Math.round(Number(item.carbs) || 0)}g</span>
+                            <span>F:${Math.round(Number(item.fat) || 0)}g</span>
                         </div>
                     </div>
                 `).join('');
             } else {
-                breakdownSection.classList.add('hidden');
+                hideEl('breakdownSection');
             }
 
-            const tipBox = document.getElementById('aiTipBox');
             if (currentAiTip) {
-                tipBox.classList.remove('hidden');
-                document.getElementById('aiTipText').textContent = currentAiTip;
+                showEl('aiTipBox');
+                setText('aiTipText', currentAiTip);
             } else {
-                tipBox.classList.add('hidden');
+                hideEl('aiTipBox');
             }
         }
 
         function resetAnalysisForm() {
-            document.getElementById('resDishName').value = '';
-            document.getElementById('resCalories').value = 0;
-            document.getElementById('resProtein').value = 0;
-            document.getElementById('resCarbs').value = 0;
-            document.getElementById('resFat').value = 0;
-            document.getElementById('foodTextInput').value = '';
-            document.getElementById('apiErrorBanner')?.classList.add('hidden');
-            clearImage();
+            setVal('resDishName', '');
+            setVal('resCalories', 0);
+            setVal('resProtein', 0);
+            setVal('resCarbs', 0);
+            setVal('resFat', 0);
+            setVal('foodTextInput', '');
+            hideEl('apiErrorBanner');
+            clearAllImages();
             currentDetectedItems = [];
             currentAiTip = '';
-            document.getElementById('breakdownSection').classList.add('hidden');
-            document.getElementById('aiTipBox').classList.add('hidden');
+            hideEl('breakdownSection');
+            hideEl('aiTipBox');
         }
 
         // ==========================================
         // Save & Delete Meal Records
         // ==========================================
         function saveMealRecord() {
-            const dishName = document.getElementById('resDishName').value.trim() || document.getElementById('foodTextInput').value.trim();
+            const dishName = getVal('resDishName', '').trim() || getVal('foodTextInput', '').trim();
             if (!dishName) {
                 showToast('請先用 AI 分析餐點，或輸入餐點名稱！', 'error');
                 return;
             }
 
-            const mealDate = document.getElementById('mealDateInput').value || selectedDateStr;
-            const mealTime = document.getElementById('mealTimeInput').value || getCurrentTimeStr();
-            const mealType = document.getElementById('mealTypeInput').value || '午餐';
+            const mealDate = getVal('mealDateInput', '') || selectedDateStr;
+            const mealTime = getVal('mealTimeInput', '') || getCurrentTimeStr();
+            const mealType = getVal('mealTypeInput', '') || '午餐';
 
-            const calories = Math.max(0, parseFloat(document.getElementById('resCalories').value) || 0);
-            const protein = Math.max(0, parseFloat(document.getElementById('resProtein').value) || 0);
-            const carbs = Math.max(0, parseFloat(document.getElementById('resCarbs').value) || 0);
-            const fat = Math.max(0, parseFloat(document.getElementById('resFat').value) || 0);
+            const calories = Math.max(0, parseFloat(getVal('resCalories', '0')) || 0);
+            const protein = Math.max(0, parseFloat(getVal('resProtein', '0')) || 0);
+            const carbs = Math.max(0, parseFloat(getVal('resCarbs', '0')) || 0);
+            const fat = Math.max(0, parseFloat(getVal('resFat', '0')) || 0);
+
+            const savedThumbnails = currentUploadedImages.map(img => img.thumbnailUrl);
 
             const newMeal = {
                 id: 'meal_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
@@ -1438,15 +1757,15 @@
                 fat: Math.round(fat * 10) / 10,
                 items: currentDetectedItems,
                 tip: currentAiTip,
-                thumbnail: currentThumbnailDataUrl || null
+                thumbnails: savedThumbnails,
+                thumbnail: savedThumbnails[0] || null
             };
 
             mealsData.push(newMeal);
             saveMealsToStorage();
 
-            // Sync selectedDateStr to the saved meal's date so user sees it immediately
             selectedDateStr = mealDate;
-            document.getElementById('globalDatePicker').value = selectedDateStr;
+            setVal('globalDatePicker', selectedDateStr);
 
             resetAnalysisForm();
             renderAllViews();
@@ -1466,27 +1785,27 @@
         function renderAllViews() {
             const isToday = selectedDateStr === getTodayDateStr();
             const dateLabel = isToday ? `今日 (${selectedDateStr})` : selectedDateStr;
-            document.getElementById('quickPreviewDateLabel').textContent = dateLabel;
-            document.getElementById('dailyDashboardDateTitle').textContent = `${dateLabel} 營養攝取總覽`;
+            setText('quickPreviewDateLabel', dateLabel);
+            setText('dailyDashboardDateTitle', `${dateLabel} 營養攝取總覽`);
 
-            const todayBadgeBtn = document.getElementById('todayBadgeBtn');
-            if (isToday) {
-                todayBadgeBtn.className = 'px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-semibold transition';
-            } else {
-                todayBadgeBtn.className = 'px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition';
+            const todayBadgeBtn = $id('todayBadgeBtn');
+            if (todayBadgeBtn) {
+                todayBadgeBtn.className = isToday
+                    ? 'px-2.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold transition'
+                    : 'px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-semibold transition';
             }
 
             renderDailyView();
             if (activeTab === 'weekly') {
                 renderWeeklyView();
             }
-            lucide.createIcons();
+            refreshIcons();
         }
 
         function getMealsForDate(dateStr) {
             return mealsData
                 .filter(m => m.date === dateStr)
-                .sort((a, b) => (a.time || '00:00').localeCompare(b.time || '00:00'));
+                .sort((a, b) => String(a.time || '00:00').localeCompare(String(b.time || '00:00')));
         }
 
         function getMealBadgeColor(mealType) {
@@ -1516,52 +1835,59 @@
             totalF = Math.round(totalF * 10) / 10;
 
             // Update Calorie Ring
-            document.getElementById('dailyTotalCalories').textContent = totalCal;
-            document.getElementById('dailyGoalCalories').textContent = userGoals.calories;
-            document.getElementById('dailyMealCount').textContent = dayMeals.length;
+            setText('dailyTotalCalories', totalCal);
+            setText('dailyGoalCalories', userGoals.calories);
+            setText('dailyMealCount', dayMeals.length);
 
             const circumference = 2 * Math.PI * 50; // r=50 => 314.16
             const calRatio = Math.min(totalCal / Math.max(1, userGoals.calories), 1);
             const offset = circumference - calRatio * circumference;
-            const circleEl = document.getElementById('calorieProgressCircle');
-            circleEl.style.strokeDashoffset = offset;
+            const circleEl = $id('calorieProgressCircle');
+            if (circleEl) {
+                circleEl.style.strokeDashoffset = offset;
+            }
 
             const remain = userGoals.calories - totalCal;
-            const remainBadge = document.getElementById('calorieRemainBadge');
-            if (remain >= 0) {
-                remainBadge.textContent = `仲可以攝取 ${remain} kcal`;
-                remainBadge.className = 'text-base font-bold text-emerald-600';
-                circleEl.classList.remove('text-red-500');
-                circleEl.classList.add('text-emerald-500');
-            } else {
-                remainBadge.textContent = `超出目標 ${Math.abs(remain)} kcal`;
-                remainBadge.className = 'text-base font-bold text-red-600';
-                circleEl.classList.remove('text-emerald-500');
-                circleEl.classList.add('text-red-500');
+            const remainBadge = $id('calorieRemainBadge');
+            if (remainBadge && circleEl) {
+                if (remain >= 0) {
+                    remainBadge.textContent = `仲可以攝取 ${remain} kcal`;
+                    remainBadge.className = 'text-base font-bold text-emerald-600';
+                    circleEl.classList.remove('text-red-500');
+                    circleEl.classList.add('text-emerald-500');
+                } else {
+                    remainBadge.textContent = `超出目標 ${Math.abs(remain)} kcal`;
+                    remainBadge.className = 'text-base font-bold text-red-600';
+                    circleEl.classList.remove('text-emerald-500');
+                    circleEl.classList.add('text-red-500');
+                }
             }
 
             // Update Macro Bars
-            document.getElementById('dailyProteinVal').textContent = totalP;
-            document.getElementById('goalProteinVal').textContent = userGoals.protein;
+            setText('dailyProteinVal', totalP);
+            setText('goalProteinVal', userGoals.protein);
             const pPct = Math.round((totalP / Math.max(1, userGoals.protein)) * 100);
-            document.getElementById('dailyProteinPct').textContent = `(${pPct}%)`;
-            document.getElementById('barProtein').style.width = `${Math.min(100, pPct)}%`;
+            setText('dailyProteinPct', `(${pPct}%)`);
+            const barProtein = $id('barProtein');
+            if (barProtein) barProtein.style.width = `${Math.min(100, pPct)}%`;
 
-            document.getElementById('dailyCarbsVal').textContent = totalC;
-            document.getElementById('goalCarbsVal').textContent = userGoals.carbs;
+            setText('dailyCarbsVal', totalC);
+            setText('goalCarbsVal', userGoals.carbs);
             const cPct = Math.round((totalC / Math.max(1, userGoals.carbs)) * 100);
-            document.getElementById('dailyCarbsPct').textContent = `(${cPct}%)`;
-            document.getElementById('barCarbs').style.width = `${Math.min(100, cPct)}%`;
+            setText('dailyCarbsPct', `(${cPct}%)`);
+            const barCarbs = $id('barCarbs');
+            if (barCarbs) barCarbs.style.width = `${Math.min(100, cPct)}%`;
 
-            document.getElementById('dailyFatVal').textContent = totalF;
-            document.getElementById('goalFatVal').textContent = userGoals.fat;
+            setText('dailyFatVal', totalF);
+            setText('goalFatVal', userGoals.fat);
             const fPct = Math.round((totalF / Math.max(1, userGoals.fat)) * 100);
-            document.getElementById('dailyFatPct').textContent = `(${fPct}%)`;
-            document.getElementById('barFat').style.width = `${Math.min(100, fPct)}%`;
+            setText('dailyFatPct', `(${fPct}%)`);
+            const barFat = $id('barFat');
+            if (barFat) barFat.style.width = `${Math.min(100, fPct)}%`;
 
             // Render meal cards in both Quick Preview & Daily Timeline
-            const quickContainer = document.getElementById('quickMealListContainer');
-            const timelineContainer = document.getElementById('dailyMealTimeline');
+            const quickContainer = $id('quickMealListContainer');
+            const timelineContainer = $id('dailyMealTimeline');
 
             if (dayMeals.length === 0) {
                 const emptyHtml = `
@@ -1569,27 +1895,42 @@
                         <p class="text-xs text-slate-400">呢一日暫時仲未有飲食記錄</p>
                     </div>
                 `;
-                quickContainer.innerHTML = emptyHtml;
-                timelineContainer.innerHTML = emptyHtml;
+                if (quickContainer) quickContainer.innerHTML = emptyHtml;
+                if (timelineContainer) timelineContainer.innerHTML = emptyHtml;
                 return;
             }
 
             const cardsHtml = dayMeals.map(meal => {
                 const badgeClass = getMealBadgeColor(meal.mealType);
-                const thumbHtml = meal.thumbnail
-                    ? `<img src="${meal.thumbnail}" alt="meal" class="w-14 h-14 rounded-xl object-cover shrink-0 border border-slate-200">`
+                const thumbsList = Array.isArray(meal.thumbnails) && meal.thumbnails.length > 0
+                    ? meal.thumbnails
+                    : (meal.thumbnail ? [meal.thumbnail] : []);
+                const extraCount = thumbsList.length > 1 ? thumbsList.length - 1 : 0;
+
+                const thumbHtml = thumbsList.length > 0
+                    ? `<div class="relative w-14 h-14 shrink-0">
+                         <img src="${thumbsList[0]}" alt="meal" class="w-14 h-14 rounded-xl object-cover border border-slate-200">
+                         ${extraCount > 0 ? `<span class="absolute -bottom-1 -right-1 bg-slate-900/85 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow">+${extraCount}</span>` : ''}
+                       </div>`
                     : `<div class="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 shrink-0">
                          <i data-lucide="utensils" class="w-6 h-6"></i>
                        </div>`;
 
-                const itemsBreakdownHtml = (meal.items && meal.items.length > 0)
+                const itemsBreakdownHtml = (Array.isArray(meal.items) && meal.items.length > 0)
                     ? `<div class="mt-2 pt-2 border-t border-slate-100 flex flex-wrap gap-1.5">
-                        ${meal.items.map(it => `<span class="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">${escapeHtml(it.name)} (${Math.round(it.calories)}kcal)</span>`).join('')}
+                        ${meal.items.map(it => `<span class="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">${escapeHtml(it.name)} (${Math.round(Number(it.calories) || 0)}kcal)</span>`).join('')}
                        </div>`
                     : '';
 
+                // Collapsible AI Nutritionist Comment
                 const tipHtml = meal.tip
-                    ? `<p class="mt-1.5 text-[11px] text-emerald-700 bg-emerald-50/70 px-2.5 py-1 rounded-lg">💡 ${escapeHtml(meal.tip)}</p>`
+                    ? `<details class="mt-2 group/tip">
+                         <summary class="list-none cursor-pointer inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition select-none">
+                           <span>💡 AI 營養師點評</span>
+                           <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-emerald-600 transition-transform duration-200 group-open/tip:rotate-180"></i>
+                         </summary>
+                         <div class="mt-1.5 text-[11px] text-emerald-900 bg-emerald-50/75 border border-emerald-200/70 px-3 py-2 rounded-xl leading-relaxed">${escapeHtml(meal.tip)}</div>
+                       </details>`
                     : '';
 
                 return `
@@ -1601,7 +1942,7 @@
                                     <span class="text-[11px] font-bold px-2 py-0.5 rounded-md ${badgeClass}">${escapeHtml(meal.mealType)}</span>
                                     <span class="text-xs text-slate-400 font-medium">${escapeHtml(meal.time)}</span>
                                 </div>
-                                <h4 class="text-sm font-bold text-slate-900 truncate">${escapeHtml(meal.dishName)}</h4>
+                                <h4 class="text-sm font-bold text-slate-900 break-words">${escapeHtml(meal.dishName)}</h4>
                                 <div class="flex flex-wrap items-center gap-2 mt-1.5 text-xs">
                                     <span class="font-extrabold text-orange-600">🔥 ${meal.calories} kcal</span>
                                     <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-medium">蛋白質 ${meal.protein}g</span>
@@ -1612,15 +1953,15 @@
                                 ${tipHtml}
                             </div>
                         </div>
-                        <button onclick="deleteMealById('${meal.id}')" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition shrink-0" title="刪除記錄">
+                        <button type="button" onclick="deleteMealById('${escapeHtml(meal.id)}')" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition shrink-0" title="刪除記錄">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
                     </div>
                 `;
             }).join('');
 
-            quickContainer.innerHTML = cardsHtml;
-            timelineContainer.innerHTML = cardsHtml;
+            if (quickContainer) quickContainer.innerHTML = cardsHtml;
+            if (timelineContainer) timelineContainer.innerHTML = cardsHtml;
         }
 
         // ==========================================
@@ -1635,12 +1976,13 @@
                 const y = d.getFullYear();
                 const m = String(d.getMonth() + 1).padStart(2, '0');
                 const day = String(d.getDate()).padStart(2, '0');
-                const dateStr = `${y}-${m}-${day}`;
-                const shortLabel = `${m}/${day}`;
-                daysList.push({ dateStr, shortLabel });
+                daysList.push({
+                    dateStr: `${y}-${m}-${day}`,
+                    shortLabel: `${m}/${day}`
+                });
             }
 
-            document.getElementById('weekRangeLabel1').textContent = `${daysList[0].shortLabel} - ${daysList[6].shortLabel}`;
+            setText('weekRangeLabel1', `${daysList[0].shortLabel} - ${daysList[6].shortLabel}`);
 
             const dailyStats = daysList.map(dayObj => {
                 const mList = getMealsForDate(dayObj.dateStr);
@@ -1668,117 +2010,126 @@
             const sumC = activeDays.reduce((acc, d) => acc + d.carbs, 0);
             const sumF = activeDays.reduce((acc, d) => acc + d.fat, 0);
 
-            document.getElementById('weekAvgCal').textContent = Math.round(sumCal / divisor);
-            document.getElementById('weekCalSub').textContent = `每日目標: ${userGoals.calories} kcal`;
-            document.getElementById('weekAvgProtein').textContent = Math.round(sumP / divisor);
-            document.getElementById('weekAvgCarbsFat').textContent = `${Math.round(sumC / divisor)}g / ${Math.round(sumF / divisor)}g`;
-            document.getElementById('weekLoggedDays').textContent = `${activeDays.length} / 7`;
+            setText('weekAvgCal', Math.round(sumCal / divisor));
+            setText('weekCalSub', `每日目標: ${userGoals.calories} kcal`);
+            setText('weekAvgProtein', Math.round(sumP / divisor));
+            setText('weekAvgCarbsFat', `${Math.round(sumC / divisor)}g / ${Math.round(sumF / divisor)}g`);
+            setText('weekLoggedDays', `${activeDays.length} / 7`);
 
-            // Render Weekly Table
-            const tbody = document.getElementById('weeklyTableBody');
-            tbody.innerHTML = dailyStats.slice().reverse().map(st => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="py-2.5 px-2 font-semibold">${st.dateStr}</td>
-                    <td class="py-2.5 px-2">${st.mealCount} 餐</td>
-                    <td class="py-2.5 px-2 font-bold text-orange-600">${st.calories} kcal</td>
-                    <td class="py-2.5 px-2 text-blue-600 font-medium">${st.protein}g</td>
-                    <td class="py-2.5 px-2 text-amber-600 font-medium">${st.carbs}g</td>
-                    <td class="py-2.5 px-2 text-rose-600 font-medium">${st.fat}g</td>
-                    <td class="py-2.5 px-2 text-right">
-                        <button onclick="jumpToDateDailyView('${st.dateStr}')" class="text-emerald-600 hover:underline font-semibold">查看明細</button>
-                    </td>
-                </tr>
-            `).join('');
+            const tbody = $id('weeklyTableBody');
+            if (tbody) {
+                tbody.innerHTML = dailyStats.slice().reverse().map(st => `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-2.5 px-2 font-semibold">${st.dateStr}</td>
+                        <td class="py-2.5 px-2">${st.mealCount} 餐</td>
+                        <td class="py-2.5 px-2 font-bold text-orange-600">${st.calories} kcal</td>
+                        <td class="py-2.5 px-2 text-blue-600 font-medium">${st.protein}g</td>
+                        <td class="py-2.5 px-2 text-amber-600 font-medium">${st.carbs}g</td>
+                        <td class="py-2.5 px-2 text-rose-600 font-medium">${st.fat}g</td>
+                        <td class="py-2.5 px-2 text-right">
+                            <button type="button" onclick="jumpToDateDailyView('${st.dateStr}')" class="text-emerald-600 hover:underline font-semibold">查看明細</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
 
-            // Render Chart 1: 7-Day Calorie Bar + Goal Line
-            const ctxCal = document.getElementById('weeklyCalorieChart').getContext('2d');
-            if (calorieChartInstance) calorieChartInstance.destroy();
-            calorieChartInstance = new Chart(ctxCal, {
-                type: 'bar',
-                data: {
-                    labels: dailyStats.map(d => d.shortLabel),
-                    datasets: [
-                        {
-                            type: 'line',
-                            label: '目標熱量 (kcal)',
-                            data: dailyStats.map(() => userGoals.calories),
-                            borderColor: '#ef4444',
-                            borderWidth: 2,
-                            borderDash: [6, 4],
-                            pointRadius: 0,
-                            fill: false
-                        },
-                        {
-                            type: 'bar',
-                            label: '攝取熱量 (kcal)',
-                            data: dailyStats.map(d => d.calories),
-                            backgroundColor: dailyStats.map(d => d.calories > userGoals.calories ? 'rgba(244, 63, 94, 0.75)' : 'rgba(16, 185, 129, 0.75)'),
-                            borderRadius: 8,
-                            maxBarThickness: 32
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+            // Guard Chart.js CDN availability
+            if (!window.Chart) return;
+
+            const calCanvas = $id('weeklyCalorieChart');
+            if (calCanvas) {
+                const ctxCal = calCanvas.getContext('2d');
+                if (calorieChartInstance) calorieChartInstance.destroy();
+                calorieChartInstance = new window.Chart(ctxCal, {
+                    type: 'bar',
+                    data: {
+                        labels: dailyStats.map(d => d.shortLabel),
+                        datasets: [
+                            {
+                                type: 'line',
+                                label: '目標熱量 (kcal)',
+                                data: dailyStats.map(() => userGoals.calories),
+                                borderColor: '#ef4444',
+                                borderWidth: 2,
+                                borderDash: [6, 4],
+                                pointRadius: 0,
+                                fill: false
+                            },
+                            {
+                                type: 'bar',
+                                label: '攝取熱量 (kcal)',
+                                data: dailyStats.map(d => d.calories),
+                                backgroundColor: dailyStats.map(d => d.calories > userGoals.calories ? 'rgba(244, 63, 94, 0.75)' : 'rgba(16, 185, 129, 0.75)'),
+                                borderRadius: 8,
+                                maxBarThickness: 32
+                            }
+                        ]
                     },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-
-            // Render Chart 2: 7-Day Macros Stacked Bar
-            const ctxMac = document.getElementById('weeklyMacrosChart').getContext('2d');
-            if (macrosChartInstance) macrosChartInstance.destroy();
-            macrosChartInstance = new Chart(ctxMac, {
-                type: 'bar',
-                data: {
-                    labels: dailyStats.map(d => d.shortLabel),
-                    datasets: [
-                        {
-                            label: '蛋白質 (g)',
-                            data: dailyStats.map(d => d.protein),
-                            backgroundColor: 'rgba(59, 130, 246, 0.85)',
-                            borderRadius: 4,
-                            maxBarThickness: 28
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
                         },
-                        {
-                            label: '碳水化合物 (g)',
-                            data: dailyStats.map(d => d.carbs),
-                            backgroundColor: 'rgba(245, 158, 11, 0.85)',
-                            borderRadius: 4,
-                            maxBarThickness: 28
-                        },
-                        {
-                            label: '脂肪 (g)',
-                            data: dailyStats.map(d => d.fat),
-                            backgroundColor: 'rgba(244, 63, 94, 0.85)',
-                            borderRadius: 4,
-                            maxBarThickness: 28
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                            x: { grid: { display: false } }
                         }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
-                    },
-                    scales: {
-                        x: { stacked: true, grid: { display: false } },
-                        y: { stacked: true, beginAtZero: true, grid: { color: '#f1f5f9' } }
                     }
-                }
-            });
+                });
+            }
+
+            const macCanvas = $id('weeklyMacrosChart');
+            if (macCanvas) {
+                const ctxMac = macCanvas.getContext('2d');
+                if (macrosChartInstance) macrosChartInstance.destroy();
+                macrosChartInstance = new window.Chart(ctxMac, {
+                    type: 'bar',
+                    data: {
+                        labels: dailyStats.map(d => d.shortLabel),
+                        datasets: [
+                            {
+                                label: '蛋白質 (g)',
+                                data: dailyStats.map(d => d.protein),
+                                backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                                borderRadius: 4,
+                                maxBarThickness: 28
+                            },
+                            {
+                                label: '碳水化合物 (g)',
+                                data: dailyStats.map(d => d.carbs),
+                                backgroundColor: 'rgba(245, 158, 11, 0.85)',
+                                borderRadius: 4,
+                                maxBarThickness: 28
+                            },
+                            {
+                                label: '脂肪 (g)',
+                                data: dailyStats.map(d => d.fat),
+                                backgroundColor: 'rgba(244, 63, 94, 0.85)',
+                                borderRadius: 4,
+                                maxBarThickness: 28
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                        },
+                        scales: {
+                            x: { stacked: true, grid: { display: false } },
+                            y: { stacked: true, beginAtZero: true, grid: { color: '#f1f5f9' } }
+                        }
+                    }
+                });
+            }
         }
 
         function jumpToDateDailyView(dateStr) {
             selectedDateStr = dateStr;
-            document.getElementById('globalDatePicker').value = selectedDateStr;
+            setVal('globalDatePicker', selectedDateStr);
+            setVal('mealDateInput', selectedDateStr);
             switchTab('daily');
         }
 
@@ -1786,32 +2137,33 @@
         // Goals Modal Management
         // ==========================================
         function openGoalsModal() {
-            document.getElementById('inputGoalCal').value = userGoals.calories;
-            document.getElementById('inputGoalProtein').value = userGoals.protein;
-            document.getElementById('inputGoalCarbs').value = userGoals.carbs;
-            document.getElementById('inputGoalFat').value = userGoals.fat;
-            document.getElementById('goalsModal').classList.remove('hidden');
+            setVal('inputGoalCal', userGoals.calories);
+            setVal('inputGoalProtein', userGoals.protein);
+            setVal('inputGoalCarbs', userGoals.carbs);
+            setVal('inputGoalFat', userGoals.fat);
+            showEl('goalsModal');
+            refreshIcons();
         }
 
         function closeGoalsModal() {
-            document.getElementById('goalsModal').classList.add('hidden');
+            hideEl('goalsModal');
         }
 
         function applyGoalPreset(cal, p, c, f) {
-            document.getElementById('inputGoalCal').value = cal;
-            document.getElementById('inputGoalProtein').value = p;
-            document.getElementById('inputGoalCarbs').value = c;
-            document.getElementById('inputGoalFat').value = f;
+            setVal('inputGoalCal', cal);
+            setVal('inputGoalProtein', p);
+            setVal('inputGoalCarbs', c);
+            setVal('inputGoalFat', f);
         }
 
         function saveGoals() {
             userGoals = {
-                calories: Math.max(500, parseInt(document.getElementById('inputGoalCal').value, 10) || 2000),
-                protein: Math.max(10, parseInt(document.getElementById('inputGoalProtein').value, 10) || 125),
-                carbs: Math.max(10, parseInt(document.getElementById('inputGoalCarbs').value, 10) || 225),
-                fat: Math.max(10, parseInt(document.getElementById('inputGoalFat').value, 10) || 65)
+                calories: Math.max(500, parseInt(getVal('inputGoalCal', '2000'), 10) || 2000),
+                protein: Math.max(10, parseInt(getVal('inputGoalProtein', '125'), 10) || 125),
+                carbs: Math.max(10, parseInt(getVal('inputGoalCarbs', '225'), 10) || 225),
+                fat: Math.max(10, parseInt(getVal('inputGoalFat', '65'), 10) || 65)
             };
-            localStorage.setItem(STORAGE_KEY_GOALS, JSON.stringify(userGoals));
+            safeStorageSet(STORAGE_KEY_GOALS, JSON.stringify(userGoals));
             closeGoalsModal();
             renderAllViews();
             showToast('🎯 已更新每日營養攝取目標！');
@@ -1821,17 +2173,8 @@
         // Sample HK Diet Data & Backup Export/Import
         // ==========================================
         function toggleDataMenu() {
-            const menu = document.getElementById('dataDropdown');
-            menu.classList.toggle('hidden');
-        }
-
-        function getOffsetDateStr(offsetDays) {
-            const d = new Date();
-            d.setDate(d.getDate() + offsetDays);
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${y}-${m}-${day}`;
+            const menu = $id('dataDropdown');
+            if (menu) menu.classList.toggle('hidden');
         }
 
         function loadSampleData(silent = false) {
@@ -1841,7 +2184,7 @@
             const d3 = getOffsetDateStr(-3);
             const d4 = getOffsetDateStr(-4);
 
-            const sampleMeals = [
+            mealsData = [
                 {
                     id: 'sample_1',
                     date: d0,
@@ -1857,7 +2200,9 @@
                         { name: '無糖高鈣豆漿', portion: '250ml', calories: 90, protein: 8, carbs: 4, fat: 4 },
                         { name: '全麥多士', portion: '1片', calories: 110, protein: 4, carbs: 23, fat: 0 }
                     ],
-                    tip: '非常理想嘅高蛋白低升糖早餐，飽肚感足又唔會令血糖大升！'
+                    tip: '非常理想嘅高蛋白低升糖早餐，飽肚感足又唔會令血糖大升！',
+                    thumbnails: [],
+                    thumbnail: null
                 },
                 {
                     id: 'sample_2',
@@ -1874,7 +2219,9 @@
                         { name: '白飯（少飯）', portion: '約180g', calories: 270, protein: 5, carbs: 60, fat: 1 },
                         { name: '凍檸茶（走甜）', portion: '1杯', calories: 30, protein: 1, carbs: 2, fat: 1 }
                     ],
-                    tip: '燒味揀去皮切雞同瘦叉燒係外食族增肌好選擇，記得嗌多碟油菜走油補充纖維！'
+                    tip: '燒味揀去皮切雞同瘦叉燒係外食族增肌好選擇，記得嗌多碟油菜走油補充纖維！',
+                    thumbnails: [],
+                    thumbnail: null
                 },
                 {
                     id: 'sample_3',
@@ -1891,7 +2238,9 @@
                         { name: '炒蛋配牛油多士', portion: '1份', calories: 210, protein: 7, carbs: 16, fat: 13 },
                         { name: '熱港式奶茶（無糖）', portion: '1杯', calories: 60, protein: 1, carbs: 5, fat: 3 }
                     ],
-                    tip: '公仔麵經油炸脂肪偏高，下次可以轉通粉或者米粉，即刻慳返近 150 kcal。'
+                    tip: '公仔麵經油炸脂肪偏高，下次可以轉通粉或者米粉，即刻慳返近 150 kcal。',
+                    thumbnails: [],
+                    thumbnail: null
                 },
                 {
                     id: 'sample_4',
@@ -1907,7 +2256,9 @@
                         { name: '米線（少米線）', portion: '1碗', calories: 310, protein: 6, carbs: 70, fat: 1 },
                         { name: '雞肉及生菜', portion: '1份', calories: 200, protein: 26, carbs: 4, fat: 7 }
                     ],
-                    tip: '清湯底配雞肉生菜低脂高蛋白，係控制卡路里嘅極佳外食之選！'
+                    tip: '清湯底配雞肉生菜低脂高蛋白，係控制卡路里嘅極佳外食之選！',
+                    thumbnails: [],
+                    thumbnail: null
                 },
                 {
                     id: 'sample_5',
@@ -1920,7 +2271,9 @@
                     carbs: 52,
                     fat: 24,
                     items: [],
-                    tip: '三文魚富含 Omega-3 健康脂肪酸，配搭糙米同西蘭花非常均衡。'
+                    tip: '三文魚富含 Omega-3 健康脂肪酸，配搭糙米同西蘭花非常均衡。',
+                    thumbnails: [],
+                    thumbnail: null
                 },
                 {
                     id: 'sample_6',
@@ -1933,7 +2286,9 @@
                     carbs: 88,
                     fat: 23,
                     items: [],
-                    tip: '炒飯吸油量較高，已經叫咗少油非常好，晚餐可以減返少少澱粉平衡返。'
+                    tip: '炒飯吸油量較高，已經叫咗少油非常好，晚餐可以減返少少澱粉平衡返。',
+                    thumbnails: [],
+                    thumbnail: null
                 },
                 {
                     id: 'sample_7',
@@ -1946,7 +2301,9 @@
                     carbs: 48,
                     fat: 18,
                     items: [],
-                    tip: '住家蒸水蛋同白灼蝦蛋白質極高而且低脂，營養滿分！'
+                    tip: '住家蒸水蛋同白灼蝦蛋白質極高而且低脂，營養滿分！',
+                    thumbnails: [],
+                    thumbnail: null
                 },
                 {
                     id: 'sample_8',
@@ -1959,7 +2316,9 @@
                     carbs: 78,
                     fat: 32,
                     items: [],
-                    tip: '兩餸飯揀西蘭花雞柳好健康，但蒸肉餅通常溝咗肥豬肉，要注意脂肪攝取。'
+                    tip: '兩餸飯揀西蘭花雞柳好健康，但蒸肉餅通常溝咗肥豬肉，要注意脂肪攝取。',
+                    thumbnails: [],
+                    thumbnail: null
                 },
                 {
                     id: 'sample_9',
@@ -1972,7 +2331,9 @@
                     carbs: 82,
                     fat: 12,
                     items: [],
-                    tip: '魚生壽司屬於低脂高蛋白餐點，避開沙律醬軍艦就唔怕肥！'
+                    tip: '魚生壽司屬於低脂高蛋白餐點，避開沙律醬軍艦就唔怕肥！',
+                    thumbnails: [],
+                    thumbnail: null
                 },
                 {
                     id: 'sample_10',
@@ -1985,7 +2346,9 @@
                     carbs: 62,
                     fat: 11,
                     items: [],
-                    tip: '鮮蝦雲吞麵份量適中，加碟走油芥蘭補充膳食纖維一流。'
+                    tip: '鮮蝦雲吞麵份量適中，加碟走油芥蘭補充膳食纖維一流。',
+                    thumbnails: [],
+                    thumbnail: null
                 },
                 {
                     id: 'sample_11',
@@ -1998,13 +2361,14 @@
                     carbs: 32,
                     fat: 19,
                     items: [],
-                    tip: '沙律醬汁另上係減脂關鍵，雞胸肉提供充足蛋白質。'
+                    tip: '沙律醬汁另上係減脂關鍵，雞胸肉提供充足蛋白質。',
+                    thumbnails: [],
+                    thumbnail: null
                 }
             ];
 
-            mealsData = sampleMeals;
             saveMealsToStorage();
-            document.getElementById('dataDropdown')?.classList.add('hidden');
+            hideEl('dataDropdown');
             if (!silent) {
                 renderAllViews();
                 showToast('✨ 已載入香港常見飲食示範數據，可到「每週趨勢」查看圖表！');
@@ -2025,13 +2389,16 @@
             a.download = `nutrisnap_backup_${getTodayDateStr()}.json`;
             a.click();
             URL.revokeObjectURL(url);
-            document.getElementById('dataDropdown').classList.add('hidden');
+            hideEl('dataDropdown');
             showToast('📥 備份檔案已下載');
         }
 
         function importData(event) {
-            const file = event.target.files?.[0];
+            const inputEl = event.target;
+            const file = inputEl?.files?.[0];
+            if (inputEl) inputEl.value = '';
             if (!file) return;
+
             const reader = new FileReader();
             reader.onload = function (e) {
                 try {
@@ -2040,7 +2407,7 @@
                         mealsData = parsed.mealsData;
                         if (parsed.userGoals) {
                             userGoals = parsed.userGoals;
-                            localStorage.setItem(STORAGE_KEY_GOALS, JSON.stringify(userGoals));
+                            safeStorageSet(STORAGE_KEY_GOALS, JSON.stringify(userGoals));
                         }
                         saveMealsToStorage();
                         renderAllViews();
@@ -2053,16 +2420,17 @@
                 }
             };
             reader.readAsText(file);
-            document.getElementById('dataDropdown').classList.add('hidden');
+            hideEl('dataDropdown');
         }
 
         function openClearConfirmModal() {
-            document.getElementById('dataDropdown').classList.add('hidden');
-            document.getElementById('clearConfirmModal').classList.remove('hidden');
+            hideEl('dataDropdown');
+            showEl('clearConfirmModal');
+            refreshIcons();
         }
 
         function closeClearConfirmModal() {
-            document.getElementById('clearConfirmModal').classList.add('hidden');
+            hideEl('clearConfirmModal');
         }
 
         function confirmClearAllData() {
@@ -2071,16 +2439,6 @@
             closeClearConfirmModal();
             renderAllViews();
             showToast('🗑️ 已清空所有飲食記錄', 'info');
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
         }
     </script>
 </body>
